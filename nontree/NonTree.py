@@ -25,10 +25,19 @@ class NonTree:
     def get_from_coord(self, coord):
         pass  # TODO
 
+    def test_from_rect(self, rect):
+        pass  # TODO
+
+    def test_from_coord(self, coord):
+        pass  # TODO
+
     def del_from_rect(self, rect):
         pass  # TODO
 
     def del_from_coord(self, coord):
+        pass  # TODO
+
+    def prune(self):
         pass  # TODO
 
     def __issizelimit(self):
@@ -118,7 +127,8 @@ class NonTree:
                     # push to lower right
                     self.subtrees[8].push_point(point)
 
-    def __split(self):  # add subtrees
+    def __split(self):
+        # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1
 
@@ -143,8 +153,6 @@ class NonTree:
             # Sector layout
             # [0][1]
             # [2][3]
-
-            # Calculation of rectangles for subtrees
 
             # x0 = x
             # y0 = y
