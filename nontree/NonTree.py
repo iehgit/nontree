@@ -1,29 +1,23 @@
 class NonTree:
 
-    def __init__(self, rect, mode, use_sets=False):
+    def __init__(self, rect, mode, lvl):
         if mode not in (2, 4, 9):
             raise ValueError(f'mode must be in(2, 4, 9), not {mode}')
+        if lvl < 0:
+            raise ValueError(f'lvl must be >= 0, not {lvl}')
 
         self.rect = rect  # (x, y, width, height)
         self.mode = mode
-        self.use_sets = use_sets
+        self.lvl = lvl
 
-        self.coord = None
-        if self.use_sets:
-            self.value = set()
-        else:
-            self.value = None
-
+        self.points = set()
         self.subtrees = []
 
     def is_leaf(self):
         return len(self.subtrees) == 0
 
     def is_empty(self):
-        if not self.is_leaf():
-            return False
-
-        return self.coord is None
+        return len(self.subtrees) == 0 and len(self.points) == 0
 
     def get_from_rect(self, rect):
         pass  # TODO
@@ -37,97 +31,96 @@ class NonTree:
     def del_from_coord(self, coord):
         pass  # TODO
 
-    def push_all(self, coord_values):
-        for coord_value in coord_values:  # coord_value: ((x,y), value)
-            coord, value = coord_value
-            self.push(coord, value)
+    def __issizelimit(self):
+        if self.mode == 2:
+            return self.rect[2] < 2
+        elif self.mode == 4:
+            return self.rect[2] < 2 or self.rect[3] < 2
+        elif self.mode == 9:
+            return self.rect[2] < 3 or self.rect[3] < 3
 
-    def push(self, coord, value):  # coord: (x,y)
-        if self.is_empty():
-            self.coord = coord
-            if self.use_sets:
-                self.value.add(value)
-            else:
-                self.value = value
+    def push_points(self, points):
+        for point in points:  # point: ((x,y), value)
+            self.push_point(point)
+
+    def push(self, coord, value):
+        self.push_point((coord, value))
+
+    def push_point(self, point):  # point: ((x,y), value)
+        if self.is_empty() or self.lvl == 0 or self.__issizelimit():
+            self.points.add(point)
             return  # value set
-
-        if self.is_leaf() and coord == self.coord:
-            if self.use_sets:
-                self.value.add(value)
-            else:
-                self.value = value
-            return  # value updated
 
         if self.is_leaf():
             self.__split()
-            self.__push_sub(self.coord, self.value)
-            self.coord = None
-            if self.use_sets:
-                self.value.clear()
-            else:
-                self.value = None
+            for p in self.points:
+                self.__push_sub(p)
+            self.points.clear()
 
-        self.__push_sub(coord, value)
+        self.__push_sub(point)
 
-    def __push_sub(self, coord, value):
+    def __push_sub(self, point):
+        coord = point[0]
+
         if self.mode == 2:
             if coord[0] < self.subtrees[1].rect[0]:  # x
                 # push to left
-                self.subtrees[0].push(coord, value)
+                self.subtrees[0].push_point(point)
             else:
                 # push to right
-                self.subtrees[1].push(coord, value)
+                self.subtrees[1].push_point(point)
 
         elif self.mode == 4:
             if coord[0] < self.subtrees[1].rect[0]:  # x
                 if coord[1] < self.subtrees[2].rect[1]:  # y:
                     # push to upper left
-                    self.subtrees[0].push(coord, value)
+                    self.subtrees[0].push_point(point)
                 else:
                     # push to lower left
-                    self.subtrees[2].push(coord, value)
+                    self.subtrees[2].push_point(point)
             else:
                 if coord[1] < self.subtrees[2].rect[1]:  # y:
                     # push to upper right
-                    self.subtrees[1].push(coord, value)
+                    self.subtrees[1].push_point(point)
                 else:
                     # push to lower right
-                    self.subtrees[3].push(coord, value)
+                    self.subtrees[3].push_point(point)
 
         elif self.mode == 9:
             if coord[0] < self.subtrees[1].rect[0]:
                 if coord[1] < self.subtrees[3].rect[1]:
                     # push to upper left
-                    self.subtrees[0].push(coord, value)
+                    self.subtrees[0].push_point(point)
                 elif coord[1] < self.subtrees[6].rect[1]:
                     # push to upper middle
-                    self.subtrees[3].push(coord, value)
+                    self.subtrees[3].push_point(point)
                 else:
                     # push to upper right
-                    self.subtrees[6].push(coord, value)
+                    self.subtrees[6].push_point(point)
             elif coord[0] < self.subtrees[2].rect[0]:
                 if coord[1] < self.subtrees[3].rect[1]:
                     # push to middle left
-                    self.subtrees[1].push(coord, value)
+                    self.subtrees[1].push_point(point)
                 elif coord[1] < self.subtrees[6].rect[1]:
                     # push to middle middle
-                    self.subtrees[4].push(coord, value)
+                    self.subtrees[4].push_point(point)
                 else:
                     # push to middle right
-                    self.subtrees[7].push(coord, value)
+                    self.subtrees[7].push_point(point)
             else:
                 if coord[1] < self.subtrees[3].rect[1]:
                     # push to lower left
-                    self.subtrees[2].push(coord, value)
+                    self.subtrees[2].push_point(point)
                 elif coord[1] < self.subtrees[6].rect[1]:
                     # push to lower middle
-                    self.subtrees[5].push(coord, value)
+                    self.subtrees[5].push_point(point)
                 else:
                     # push to lower right
-                    self.subtrees[8].push(coord, value)
+                    self.subtrees[8].push_point(point)
 
     def __split(self):  # add subtrees
         x, y, width, height = self.rect
+        newlvl = self.lvl - 1
 
         if self.mode == 2:
             # Sector layout
@@ -143,8 +136,8 @@ class NonTree:
             w1 = width - w0
             # h1 = h0
 
-            self.subtrees.append(NonTree((x, y, w0, height), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y, w1, height), self.mode, self.use_sets))
+            self.subtrees.append(NonTree((x, y, w0, height), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y, w1, height), self.mode, newlvl))
 
         elif self.mode == 4:
             # Sector layout
@@ -173,10 +166,10 @@ class NonTree:
             # w3 = w1
             # h3 = h2
 
-            self.subtrees.append(NonTree((x, y, w0, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y, w1, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x, y2, w0, h2), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y2, w1, h2), self.mode, self.use_sets))
+            self.subtrees.append(NonTree((x, y, w0, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y, w1, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x, y2, w0, h2), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y2, w1, h2), self.mode, newlvl))
 
         elif self.mode == 9:
             # Sector layout
@@ -229,12 +222,12 @@ class NonTree:
             # w8 = w2
             # h8 = h6
 
-            self.subtrees.append(NonTree((x, y, w0, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y, w0, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x2, y, w2, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x, y3, w0, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y3, w0, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x2, y3, w2, h0), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x, y6, w0, h6), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x1, y6, w0, h6), self.mode, self.use_sets))
-            self.subtrees.append(NonTree((x2, y6, w2, h6), self.mode, self.use_sets))
+            self.subtrees.append(NonTree((x, y, w0, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y, w0, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x2, y, w2, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x, y3, w0, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y3, w0, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x2, y3, w2, h0), self.mode, newlvl))
+            self.subtrees.append(NonTree((x, y6, w0, h6), self.mode, newlvl))
+            self.subtrees.append(NonTree((x1, y6, w0, h6), self.mode, newlvl))
+            self.subtrees.append(NonTree((x2, y6, w2, h6), self.mode, newlvl))
