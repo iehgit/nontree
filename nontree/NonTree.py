@@ -20,25 +20,85 @@ class NonTree:
         return len(self.subtrees) == 0 and len(self.points) == 0
 
     def get_from_rect(self, rect):
-        pass  # TODO
+        if self.is_leaf():
+            return [p for p in self.points if self.collidepoint(rect, p[0])]
+
+        res = []
+        for s in self.subtrees:
+            if self.colliderect(s.rect, rect):
+                res.extend(s.get_from_rect(rect))
+
+        return res
 
     def get_from_coord(self, coord):
-        pass  # TODO
+        if self.is_leaf():
+            return [p for p in self.points if p[0] == coord]
+
+        for s in self.subtrees:
+            if self.collidepoint(s.rect, coord):
+                return s.get_from_coord(coord)
+
+        return []
 
     def test_from_rect(self, rect):
-        pass  # TODO
+        if self.is_leaf():
+            for p in self.points:
+                if self.collidepoint(rect, p[0]):
+                    return True
+
+        for s in self.subtrees:
+            if s.colliderect(s.rect, rect):
+                if s.test_from_rect(rect):
+                    return True
+
+        return False
 
     def test_from_coord(self, coord):
-        pass  # TODO
+        if self.is_leaf():
+            for p in self.points:
+                if p[0] == coord:
+                    return True
+
+        for s in self.subtrees:
+            if s.collidepoint(s.rect, coord):
+                if s.test_from_coord(coord):
+                    return True
+                break
+
+        return False
 
     def del_from_rect(self, rect):
-        pass  # TODO
+        if self.is_leaf():
+            self.points = set(filter(lambda p: not self.collidepoint(rect, p[0]), self.points))
+            return
+
+        for s in self.subtrees:
+            if self.colliderect(s.rect, rect):
+                s.del_from_rect(rect)
 
     def del_from_coord(self, coord):
-        pass  # TODO
+        if self.is_leaf():
+            self.points = set(filter(lambda p: p[0] != coord, self.points))
+            return
+
+        for s in self.subtrees:
+            if self.collidepoint(s.rect, coord):
+                s.del_from_coord(coord)
+                break
 
     def prune(self):
-        pass  # TODO
+        if self.is_leaf():
+            return
+
+        all_empty = True
+        for s in self.subtrees:
+            s.prune()
+            if not s.is_empty():
+                all_empty = False
+                break
+
+        if all_empty:
+            self.subtrees = []
 
     def __issizelimit(self):
         if self.mode == 2:
@@ -81,14 +141,14 @@ class NonTree:
 
         elif self.mode == 4:
             if coord[0] < self.subtrees[1].rect[0]:  # x
-                if coord[1] < self.subtrees[2].rect[1]:  # y:
+                if coord[1] < self.subtrees[2].rect[1]:  # y
                     # push to upper left
                     self.subtrees[0].push_point(point)
                 else:
                     # push to lower left
                     self.subtrees[2].push_point(point)
             else:
-                if coord[1] < self.subtrees[2].rect[1]:  # y:
+                if coord[1] < self.subtrees[2].rect[1]:  # y
                     # push to upper right
                     self.subtrees[1].push_point(point)
                 else:
@@ -96,31 +156,31 @@ class NonTree:
                     self.subtrees[3].push_point(point)
 
         elif self.mode == 9:
-            if coord[0] < self.subtrees[1].rect[0]:
-                if coord[1] < self.subtrees[3].rect[1]:
+            if coord[0] < self.subtrees[1].rect[0]:  # x
+                if coord[1] < self.subtrees[3].rect[1]:  # y
                     # push to upper left
                     self.subtrees[0].push_point(point)
-                elif coord[1] < self.subtrees[6].rect[1]:
+                elif coord[1] < self.subtrees[6].rect[1]:  # y
                     # push to upper middle
                     self.subtrees[3].push_point(point)
                 else:
                     # push to upper right
                     self.subtrees[6].push_point(point)
-            elif coord[0] < self.subtrees[2].rect[0]:
-                if coord[1] < self.subtrees[3].rect[1]:
+            elif coord[0] < self.subtrees[2].rect[0]:  # x
+                if coord[1] < self.subtrees[3].rect[1]:  # y
                     # push to middle left
                     self.subtrees[1].push_point(point)
-                elif coord[1] < self.subtrees[6].rect[1]:
+                elif coord[1] < self.subtrees[6].rect[1]:  # y
                     # push to middle middle
                     self.subtrees[4].push_point(point)
                 else:
                     # push to middle right
                     self.subtrees[7].push_point(point)
             else:
-                if coord[1] < self.subtrees[3].rect[1]:
+                if coord[1] < self.subtrees[3].rect[1]:  # y
                     # push to lower left
                     self.subtrees[2].push_point(point)
-                elif coord[1] < self.subtrees[6].rect[1]:
+                elif coord[1] < self.subtrees[6].rect[1]:  # y
                     # push to lower middle
                     self.subtrees[5].push_point(point)
                 else:
@@ -239,3 +299,12 @@ class NonTree:
             self.subtrees.append(NonTree((x, y6, w0, h6), self.mode, newlvl))
             self.subtrees.append(NonTree((x1, y6, w0, h6), self.mode, newlvl))
             self.subtrees.append(NonTree((x2, y6, w2, h6), self.mode, newlvl))
+
+    @staticmethod
+    def collidepoint(rect, point):
+        return rect[0] <= point[0] <= rect[0] + rect[2] and rect[1] <= point[1] <= rect[1] + rect[3]
+
+    @staticmethod
+    def colliderect(rect, other_rect):
+        return rect[0] < other_rect[0] + other_rect[2] and rect[1] < other_rect[1] + other_rect[3] and rect[0] + rect[
+            2] > other_rect[0] and rect[1] + rect[3] > other_rect[1]
