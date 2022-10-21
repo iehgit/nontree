@@ -14,10 +14,10 @@ class NonTree:
         self.subtrees = []
 
     def is_leaf(self):
-        return len(self.subtrees) == 0
+        return not self.subtrees
 
     def is_empty(self):
-        return len(self.subtrees) == 0 and len(self.points) == 0
+        return not self.subtrees and not self.points
 
     def get_from_rect(self, rect):
         if self.is_leaf():
@@ -98,7 +98,7 @@ class NonTree:
                 break
 
         if all_empty:
-            self.subtrees = []
+            self.subtrees.clear()
 
     def __issizelimit(self):
         if self.mode == 2:
