@@ -1,17 +1,24 @@
+import math
+
+
 class NonTree:
 
-    def __init__(self, rect, mode, lvl):
+    def __init__(self, rect, mode, lvl=None):
         if mode not in (2, 4, 9):
             raise ValueError(f'mode must be in(2, 4, 9), not {mode}')
-        if lvl < 0:
-            raise ValueError(f'lvl must be >= 0, not {lvl}')
+
+        if lvl is None:
+            # heuristic guess
+            lvl = int(math.log(min(rect[2], rect[3]) + 1) // math.log(9))
+        elif lvl < 0:
+            raise ValueError(f'lvl must be >= 0 or None, not {lvl}')
 
         self.rect = rect  # (x, y, width, height)
         self.mode = mode
         self.lvl = lvl
 
         self.points = set()
-        self.subtrees = []
+        self.subtrees = None
 
     def is_leaf(self):
         return not self.subtrees
@@ -45,11 +52,11 @@ class NonTree:
             for p in self.points:
                 if self.collidepoint(rect, p[0]):
                     return True
-
-        for s in self.subtrees:
-            if s.colliderect(s.rect, rect):
-                if s.test_from_rect(rect):
-                    return True
+        else:
+            for s in self.subtrees:
+                if s.colliderect(s.rect, rect):
+                    if s.test_from_rect(rect):
+                        return True
 
         return False
 
@@ -58,12 +65,12 @@ class NonTree:
             for p in self.points:
                 if p[0] == coord:
                     return True
-
-        for s in self.subtrees:
-            if s.collidepoint(s.rect, coord):
-                if s.test_from_coord(coord):
-                    return True
-                break
+        else:
+            for s in self.subtrees:
+                if s.collidepoint(s.rect, coord):
+                    if s.test_from_coord(coord):
+                        return True
+                    break
 
         return False
 
@@ -98,7 +105,8 @@ class NonTree:
                 break
 
         if all_empty:
-            self.subtrees.clear()
+            self.points = set()
+            self.subtrees = None
 
     def __issizelimit(self):
         if self.mode == 2:
@@ -124,7 +132,7 @@ class NonTree:
             self.__split()
             for p in self.points:
                 self.__push_sub(p)
-            self.points.clear()
+            self.points = None
 
         self.__push_sub(point)
 
@@ -188,6 +196,8 @@ class NonTree:
                     self.subtrees[8].push_point(point)
 
     def __split(self):
+        self.subtrees = []
+
         # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1
