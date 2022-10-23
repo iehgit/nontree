@@ -2,29 +2,43 @@ from NonTree import NonTree
 
 
 class QuadTree(NonTree):
+    """A class for efficient collision detection of data points in a sparse 2D plane.
+    Based on the well known Quadtree data structure.
+    This is a variant that splits each plane into 4 sub-trees in a 2 by 2 grid.
+    """
 
-    def __issizelimit(self):
+    def _issizelimit(self):
+        """Tests if tree is too small to be split into sub-trees.
+
+        :return: True if size below mimimum size, False if not.
+        """
         return self.rect[2] < 2 or self.rect[3] < 2
 
-    def __push_sub(self, point):
-        coord = point[0]
+    def _push_sub(self, data_point):
+        """Push a data point into a sub-tree.
 
-        if coord[0] < self.subtrees[1].rect[0]:  # x
-            if coord[1] < self.subtrees[2].rect[1]:  # y
+        :param data_point: A data point in the form of ((x,y), value).
+        """
+        point = data_point[0]
+
+        if point[0] < self.subtrees[1].rect[0]:  # x
+            if point[1] < self.subtrees[2].rect[1]:  # y
                 # push to upper left
-                self.subtrees[0].push_point(point)
+                self.subtrees[0].add(data_point)
             else:
                 # push to lower left
-                self.subtrees[2].push_point(point)
+                self.subtrees[2].add(data_point)
         else:
-            if coord[1] < self.subtrees[2].rect[1]:  # y
+            if point[1] < self.subtrees[2].rect[1]:  # y
                 # push to upper right
-                self.subtrees[1].push_point(point)
+                self.subtrees[1].add(data_point)
             else:
                 # push to lower right
-                self.subtrees[3].push_point(point)
+                self.subtrees[3].add(data_point)
 
-    def __split(self):
+    def _split(self):
+        """Split tree into sub-trees.
+        """
         self.subtrees = []
 
         # Calculation of rectangles for subtrees
