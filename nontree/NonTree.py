@@ -21,11 +21,11 @@ class NonTree:
 
     def get_from_rect(self, rect):
         if not self.subtrees:  # leaf
-            return {p for p in self.points if self.collidepoint(rect, p[0])}
+            return {p for p in self.points if self.collide_rectpoint(rect, p[0])}
 
         res = set()
         for s in self.subtrees:
-            if self.colliderect(s.rect, rect):
+            if self.collide_rectrect(s.rect, rect):
                 res |= s.get_from_rect(rect)
 
         return res
@@ -35,19 +35,30 @@ class NonTree:
             return {p for p in self.points if p[0] == coord}
 
         for s in self.subtrees:
-            if self.collidepoint(s.rect, coord):
+            if self.collide_rectpoint(s.rect, coord):
                 return s.get_from_coord(coord)
 
         return set()
 
+    def get_from_circle(self, circ):
+        if not self.subtrees:  # leaf
+            return {p for p in self.points if self.collide_circlepoint(circ, p[0])}
+
+        res = set()
+        for s in self.subtrees:
+            if self.collide_rectcircle(s.rect, circ):
+                res |= s.get_from_circle(circ)
+
+        return res
+
     def test_from_rect(self, rect):
         if not self.subtrees:  # leaf
             for p in self.points:
-                if self.collidepoint(rect, p[0]):
+                if self.collide_rectpoint(rect, p[0]):
                     return True
         else:
             for s in self.subtrees:
-                if s.colliderect(s.rect, rect):
+                if self.collide_rectrect(s.rect, rect):
                     if s.test_from_rect(rect):
                         return True
 
@@ -60,20 +71,33 @@ class NonTree:
                     return True
         else:
             for s in self.subtrees:
-                if s.collidepoint(s.rect, coord):
+                if self.collide_rectpoint(s.rect, coord):
                     if s.test_from_coord(coord):
                         return True
                     break
 
         return False
 
+    def test_from_circle(self, circ):
+        if not self.subtrees:  # leaf
+            for p in self.points:
+                if self.collide_circlepoint(circ, p[0]):
+                    return True
+        else:
+            for s in self.subtrees:
+                if self.collide_rectcircle(s.rect, circ):
+                    if s.test_from_circle(circ):
+                        return True
+
+        return False
+
     def del_from_rect(self, rect):
         if not self.subtrees:  # leaf
-            self.points = set(filter(lambda p: not self.collidepoint(rect, p[0]), self.points))
+            self.points = set(filter(lambda p: not self.collide_rectpoint(rect, p[0]), self.points))
             return
 
         for s in self.subtrees:
-            if self.colliderect(s.rect, rect):
+            if self.collide_rectrect(s.rect, rect):
                 s.del_from_rect(rect)
 
     def del_from_coord(self, coord):
@@ -82,7 +106,7 @@ class NonTree:
             return
 
         for s in self.subtrees:
-            if self.collidepoint(s.rect, coord):
+            if self.collide_rectpoint(s.rect, coord):
                 s.del_from_coord(coord)
                 break
 
@@ -226,10 +250,31 @@ class NonTree:
         self.subtrees.append(NonTree((x2, y6, w2, h6), newlvl))
 
     @staticmethod
-    def collidepoint(rect, point):
+    def collide_rectpoint(rect, point):
         return rect[0] <= point[0] <= rect[0] + rect[2] and rect[1] <= point[1] <= rect[1] + rect[3]
 
     @staticmethod
-    def colliderect(rect, other_rect):
+    def collide_rectrect(rect, other_rect):
         return rect[0] < other_rect[0] + other_rect[2] and rect[1] < other_rect[1] + other_rect[3] and rect[0] + rect[
             2] > other_rect[0] and rect[1] + rect[3] > other_rect[1]
+
+    @staticmethod
+    def collide_rectcircle(rect, circ):
+        if not (NonTree.collide_rectrect(rect, (circ[0] - circ[2], circ[1] - circ[2], circ[2] * 2, circ[2] * 2))):
+            return False
+
+        if NonTree.collide_rectpoint(rect, circ):
+            return True
+
+        dx = circ[0] - max(rect[0], min(circ[0], rect[0] + rect[2]))
+        dy = circ[1] - max(rect[1], min(circ[1], rect[1] + rect[3]))
+
+        return dx ** 2 + dy ** 2 <= circ[2] ** 2
+
+    @staticmethod
+    def collide_circlepoint(circ, point):
+        dx = circ[0] - point[0]
+        dy = circ[1] - point[1]
+
+        return dx ** 2 + dy ** 2 <= circ[2] ** 2
+
