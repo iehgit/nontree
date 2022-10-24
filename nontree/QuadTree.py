@@ -7,6 +7,8 @@ class QuadTree(NonTree):
     This is a variant that splits each plane into 4 sub-trees in a 2 by 2 grid.
     """
 
+    MODE = 4
+
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
 

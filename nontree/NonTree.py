@@ -7,6 +7,8 @@ class NonTree:
     This is a variant that splits each plane into 9 sub-trees in a 3 by 3 grid.
     """
 
+    MODE = 9
+
     def __init__(self, rect, lvl=None):
         """
         :param rect: A rectangle in form of (x, y, width, height).
@@ -14,7 +16,7 @@ class NonTree:
         """
         if lvl is None:
             # heuristic guess
-            lvl = int(math.log1p(min(rect[2], rect[3])) / math.log(9))
+            lvl = int(math.log(min(rect[2], rect[3])) // math.log(self.MODE))
         elif lvl < 0:
             raise ValueError(f'lvl must be >= 0 or None, not {lvl}')
 
@@ -389,5 +391,3 @@ class NonTree:
         dy = circ[1] - point[1]
 
         return dx ** 2 + dy ** 2 <= circ[2] ** 2
-
-
