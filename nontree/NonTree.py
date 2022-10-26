@@ -26,6 +26,18 @@ class NonTree:
         self.data_points = set()
         self.subtrees = None
 
+    def __len__(self):
+        if self.data_points is not None:
+            return len(self.data_points)
+
+        ln = 0
+        for s in self.subtrees:
+            ln += len(s)
+        return ln
+
+    def __bool__(self):
+        return self.subtrees or self.data_points
+
     def is_empty(self):
         """Test if the tree contains no values.
 
