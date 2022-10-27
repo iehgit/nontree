@@ -7,7 +7,7 @@ def plot(ntree):
     :param ntree: A NonTree (or derivative)
     """
     pyplot.figure(figsize=(20, 20))
-    pyplot.title(f"{ntree.MODE}-tree")
+    pyplot.title(ntree)
 
     x = []
     y = []

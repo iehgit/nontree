@@ -26,6 +26,9 @@ class NonTree:
         self.data_points = set()
         self.subtrees = None
 
+    def __repr__(self):
+        return f"{type(self).__qualname__}({self.rect}, {self.lvl})"
+
     def __len__(self):
         if self.data_points is not None:
             return len(self.data_points)
