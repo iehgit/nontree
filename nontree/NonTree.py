@@ -1,5 +1,14 @@
 import math
 
+try:
+    import numba
+except ModuleNotFoundError:
+    def conditional_njit(function):
+        return function
+else:
+    def conditional_njit(function):
+        return numba.njit(cache=True)(function)
+
 
 class NonTree:
     """A class for efficient collision detection of data points in a sparse 2D plane.
@@ -60,8 +69,7 @@ class NonTree:
         :return: A list of data points in the form of ((x, y), value).
         """
 
-        if rect[0] <= self.rect[0] and rect[1] <= self.rect[1] and rect[0] + rect[2] >= self.rect[0] + self.rect[2] and \
-                rect[1] + rect[3] >= self.rect[1] + self.rect[3]:  # rect encompasses self.rect
+        if self.encompass_rectrect(rect, self.rect):
             if not self.subtrees:  # leaf
                 return self.data_points
 
@@ -117,10 +125,7 @@ class NonTree:
         :param circ: A circle in the form (x, y, radius).
         :return: A list of data points in the form of ((x, y), value).
         """
-
-        dx = max(abs(circ[0] - self.rect[0]), abs(circ[0] - (self.rect[0] + self.rect[2])))
-        dy = max(abs(circ[1] - self.rect[1]), abs(circ[1] - (self.rect[1] + self.rect[3])))
-        if dx ** 2 + dy ** 2 <= circ[2] ** 2:  # circle encompasses self.rect
+        if self.encompass_circlerect(circ, self.rect):
             if not self.subtrees:  # leaf
                 return self.data_points
 
@@ -392,6 +397,30 @@ class NonTree:
                          NonTree((x2, y6, w2, h6), newlvl, self.bucket)]
 
     @staticmethod
+    def encompass_rectrect(rect, other_rect):
+        """Test if rectangle encompasses rectangle
+
+        :param rect: A rectangle in form of (x, y, width, height).
+        :param other_rect: A rectangle in form of (x, y, width, height).
+        :return: True if rect encompasses other_rect, False if not.
+        """
+        return rect[0] <= other_rect[0] and rect[1] <= other_rect[1] and rect[0] + rect[2] >= other_rect[0] + \
+               other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
+
+    @staticmethod
+    @conditional_njit
+    def encompass_circlerect(circ, rect):
+        """Test if circle encompasses rectangle.
+
+        :param circ: A circle in the form (x, y, radius).
+        :param rect: A rectangle in form of (x, y, width, height).
+        :return: True if circ encompasses rect, False if not.
+        """
+        dx = max(abs(circ[0] - rect[0]), abs(circ[0] - (rect[0] + rect[2])))
+        dy = max(abs(circ[1] - rect[1]), abs(circ[1] - (rect[1] + rect[3])))
+        return dx ** 2 + dy ** 2 <= circ[2] ** 2
+
+    @staticmethod
     def collide_rectpoint(rect, point):
         """Test collision between rectangle and point.
 
@@ -413,6 +442,7 @@ class NonTree:
             2] > other_rect[0] and rect[1] + rect[3] > other_rect[1]
 
     @staticmethod
+    @conditional_njit
     def collide_rectcircle(rect, circ):
         """Test collision between rectangle and circle.
 
@@ -426,6 +456,7 @@ class NonTree:
         return dx ** 2 + dy ** 2 <= circ[2] ** 2
 
     @staticmethod
+    @conditional_njit
     def collide_circlepoint(circ, point):
         """Test collision between circle and point.
 
