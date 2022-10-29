@@ -61,7 +61,7 @@ class NonTree:
         """
 
         if rect[0] <= self.rect[0] and rect[1] <= self.rect[1] and rect[0] + rect[2] >= self.rect[0] + self.rect[2] and \
-                rect[1] + rect[3] >= self.rect[1] + self.rect[3]:  # rect encompasses sef.rect
+                rect[1] + rect[3] >= self.rect[1] + self.rect[3]:  # rect encompasses self.rect
             if not self.subtrees:  # leaf
                 return self.data_points
 
@@ -117,16 +117,29 @@ class NonTree:
         :param circ: A circle in the form (x, y, radius).
         :return: A list of data points in the form of ((x, y), value).
         """
-        # TODO perf: check for encompassment
-        if not self.subtrees:  # leaf
-            return [dp for dp in self.data_points if self.collide_circlepoint(circ, dp[0])]
 
-        res = []
-        for s in self.subtrees:
-            if self.collide_rectcircle(s.rect, circ):
-                res += s.get_from_circle(circ)
+        dx = max(abs(circ[0] - self.rect[0]), abs(circ[0] - (self.rect[0] + self.rect[2])))
+        dy = max(abs(circ[1] - self.rect[1]), abs(circ[1] - (self.rect[1] + self.rect[3])))
+        if dx ** 2 + dy ** 2 <= circ[2] ** 2:  # circle encompasses self.rect
+            if not self.subtrees:  # leaf
+                return self.data_points
 
-        return res
+            res = []
+            for s in self.subtrees:
+                res += s.get_from_encompassed()
+
+            return res
+
+        else:
+            if not self.subtrees:  # leaf
+                return [dp for dp in self.data_points if self.collide_circlepoint(circ, dp[0])]
+
+            res = []
+            for s in self.subtrees:
+                if self.collide_rectcircle(s.rect, circ):
+                    res += s.get_from_circle(circ)
+
+            return res
 
     def test_from_rect(self, rect):
         """Tests if there are data points within a rectangle.
@@ -407,12 +420,6 @@ class NonTree:
         :param circ: A circle in the form (x, y, radius).
         :return: True if collision, False if not.
         """
-        if not (NonTree.collide_rectrect(rect, (circ[0] - circ[2], circ[1] - circ[2], circ[2] * 2, circ[2] * 2))):
-            return False
-
-        if NonTree.collide_rectpoint(rect, circ):
-            return True
-
         dx = circ[0] - max(rect[0], min(circ[0], rect[0] + rect[2]))
         dy = circ[1] - max(rect[1], min(circ[1], rect[1] + rect[3]))
 
