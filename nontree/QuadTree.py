@@ -69,5 +69,6 @@ class QuadTree(NonTree):
         # w3 = w1
         # h3 = h2
 
-        self.subtrees = [QuadTree((x, y, w0, h0), newlvl), QuadTree((x1, y, w1, h0), newlvl),
-                         QuadTree((x, y2, w0, h2), newlvl), QuadTree((x1, y2, w1, h2), newlvl)]
+        self.subtrees = [QuadTree((x, y, w0, h0), newlvl, self.bucket), QuadTree((x1, y, w1, h0), newlvl, self.bucket),
+                         QuadTree((x, y2, w0, h2), newlvl, self.bucket),
+                         QuadTree((x1, y2, w1, h2), newlvl, self.bucket)]

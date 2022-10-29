@@ -63,7 +63,8 @@ class BiTree(NonTree):
             # w1 = w0
             h1 = height - h0
 
-            self.subtrees = [BiTree((x, y, width, h0), newlvl), BiTree((x, y1, width, h1), newlvl)]
+            self.subtrees = [BiTree((x, y, width, h0), newlvl, self.bucket),
+                             BiTree((x, y1, width, h1), newlvl, self.bucket)]
         else:
             # Sector layout
             # [0][1]
@@ -78,4 +79,5 @@ class BiTree(NonTree):
             w1 = width - w0
             # h1 = h0
 
-            self.subtrees = [BiTree((x, y, w0, height), newlvl), BiTree((x1, y, w1, height), newlvl)]
+            self.subtrees = [BiTree((x, y, w0, height), newlvl, self.bucket),
+                             BiTree((x1, y, w1, height), newlvl, self.bucket)]

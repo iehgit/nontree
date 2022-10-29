@@ -9,12 +9,11 @@ class NonTree:
 
     MODE = 9  # Number of subtrees a tree is split into
 
-    BUCKET = 20  # Maximum number of points in a tree, before it is split into subtrees
-
-    def __init__(self, rect, lvl=None):
+    def __init__(self, rect, lvl=None, bucket=20):
         """
         :param rect: A rectangle in form of (x, y, width, height).
         :param lvl: Maximum nesting depth. None for automatic heuristic value.
+        :param bucket: Maximum number of points in a tree, before it is split into subtrees.
         """
         if lvl is None:
             # heuristic guess
@@ -22,14 +21,18 @@ class NonTree:
         elif lvl < 0:
             raise ValueError(f'lvl must be >= 0 or None, not {lvl}')
 
+        if bucket < 1:
+            raise ValueError(f'bucket must be >= 1, not {bucket}')
+
         self.rect = rect
         self.lvl = lvl
+        self.bucket = bucket
 
         self.data_points = []
         self.subtrees = None
 
     def __repr__(self):
-        return f"{type(self).__qualname__}({self.rect}, {self.lvl})"
+        return f"{type(self).__qualname__}({self.rect}, {self.lvl}, {self.bucket})"
 
     def __len__(self):
         if self.data_points is not None:
@@ -226,16 +229,13 @@ class NonTree:
         if not self.subtrees:  # leaf
             return
 
-        all_empty = True
         for s in self.subtrees:
             s.prune()
             if not s.is_empty():
-                all_empty = False
-                break
+                return
 
-        if all_empty:
-            self.data_points = []
-            self.subtrees = None
+        self.data_points = []
+        self.subtrees = None
 
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
@@ -265,9 +265,9 @@ class NonTree:
 
         :param data_point: A data point in the form of ((x,y), value).
         """
-        if not self.subtrees and (len(self.data_points) < self.BUCKET or self.lvl == 0 or self._issizelimit()):
+        if not self.subtrees and (len(self.data_points) < self.bucket or self.lvl == 0 or self._issizelimit()):
             self.data_points.append(data_point)
-            return  # value set
+            return
 
         if not self.subtrees:  # leaf
             self._split()
@@ -372,11 +372,11 @@ class NonTree:
         # w8 = w2
         # h8 = h6
 
-        self.subtrees = [NonTree((x, y, w0, h0), newlvl), NonTree((x1, y, w0, h0), newlvl),
-                         NonTree((x2, y, w2, h0), newlvl), NonTree((x, y3, w0, h0), newlvl),
-                         NonTree((x1, y3, w0, h0), newlvl), NonTree((x2, y3, w2, h0), newlvl),
-                         NonTree((x, y6, w0, h6), newlvl), NonTree((x1, y6, w0, h6), newlvl),
-                         NonTree((x2, y6, w2, h6), newlvl)]
+        self.subtrees = [NonTree((x, y, w0, h0), newlvl, self.bucket), NonTree((x1, y, w0, h0), newlvl, self.bucket),
+                         NonTree((x2, y, w2, h0), newlvl, self.bucket), NonTree((x, y3, w0, h0), newlvl, self.bucket),
+                         NonTree((x1, y3, w0, h0), newlvl, self.bucket), NonTree((x2, y3, w2, h0), newlvl, self.bucket),
+                         NonTree((x, y6, w0, h6), newlvl, self.bucket), NonTree((x1, y6, w0, h6), newlvl, self.bucket),
+                         NonTree((x2, y6, w2, h6), newlvl, self.bucket)]
 
     @staticmethod
     def collide_rectpoint(rect, point):
