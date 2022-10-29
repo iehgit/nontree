@@ -7,7 +7,9 @@ class NonTree:
     This is a variant that splits each plane into 9 sub-trees in a 3 by 3 grid.
     """
 
-    MODE = 9
+    MODE = 9  # Number of subtrees a tree is split into
+
+    BUCKET = 20  # Maximum number of points in a tree, before it is split into subtrees
 
     def __init__(self, rect, lvl=None):
         """
@@ -16,14 +18,14 @@ class NonTree:
         """
         if lvl is None:
             # heuristic guess
-            lvl = int(math.log(min(rect[2], rect[3])) // math.log(self.MODE))
+            lvl = int(math.log1p(min(rect[2], rect[3])) / math.log(self.MODE) + 0.5)
         elif lvl < 0:
             raise ValueError(f'lvl must be >= 0 or None, not {lvl}')
 
         self.rect = rect
         self.lvl = lvl
 
-        self.data_points = set()
+        self.data_points = []
         self.subtrees = None
 
     def __repr__(self):
@@ -52,46 +54,74 @@ class NonTree:
         """Gets all data points that are within an rectangle.
 
         :param rect: A rectangle in form of (x, y, width, height).
-        :return: A set of data points in the form of ((x, y), value).
+        :return: A list of data points in the form of ((x, y), value).
+        """
+
+        if rect[0] <= self.rect[0] and rect[1] <= self.rect[1] and rect[0] + rect[2] >= self.rect[0] + self.rect[2] and \
+                rect[1] + rect[3] >= self.rect[1] + self.rect[3]:  # rect encompasses sef.rect
+            if not self.subtrees:  # leaf
+                return self.data_points
+
+            res = []
+            for s in self.subtrees:
+                res += s.get_from_encompassed()
+
+            return res
+
+        else:
+            if not self.subtrees:  # leaf
+                return [dp for dp in self.data_points if self.collide_rectpoint(rect, dp[0])]
+
+            res = []
+            for s in self.subtrees:
+                if self.collide_rectrect(s.rect, rect):
+                    res += s.get_from_rect(rect)
+
+            return res
+
+    def get_from_encompassed(self):
+        """Gets all data points that are within the tree.
+
+        :return: A list of data points in the form of ((x, y), value).
         """
         if not self.subtrees:  # leaf
-            return {dp for dp in self.data_points if self.collide_rectpoint(rect, dp[0])}
+            return self.data_points
 
-        res = set()
+        res = []
+
         for s in self.subtrees:
-            if self.collide_rectrect(s.rect, rect):
-                res |= s.get_from_rect(rect)
-
+            res += s.get_from_encompassed()
         return res
 
     def get_from_point(self, point):
         """Gets all data points that are on a point.
 
         :param point: A point in the form (x, y).
-        :return: A set of data points in the form of ((x, y), value).
+        :return: A list of data points in the form of ((x, y), value).
         """
         if not self.subtrees:  # leaf
-            return {dp for dp in self.data_points if dp[0] == point}
+            return [dp for dp in self.data_points if dp[0] == point]
 
         for s in self.subtrees:
             if self.collide_rectpoint(s.rect, point):
                 return s.get_from_point(point)
 
-        return set()
+        return []
 
     def get_from_circle(self, circ):
         """Gets all data points that are within a circle.
 
         :param circ: A circle in the form (x, y, radius).
-        :return: A set of data points in the form of ((x, y), value).
+        :return: A list of data points in the form of ((x, y), value).
         """
+        # TODO perf: check for encompassment
         if not self.subtrees:  # leaf
-            return {dp for dp in self.data_points if self.collide_circlepoint(circ, dp[0])}
+            return [dp for dp in self.data_points if self.collide_circlepoint(circ, dp[0])]
 
-        res = set()
+        res = []
         for s in self.subtrees:
             if self.collide_rectcircle(s.rect, circ):
-                res |= s.get_from_circle(circ)
+                res += s.get_from_circle(circ)
 
         return res
 
@@ -156,7 +186,7 @@ class NonTree:
         :param rect: A rectangle in form of (x, y, width, height).
         """
         if not self.subtrees:  # leaf
-            self.data_points = set(filter(lambda dp: not self.collide_rectpoint(rect, dp[0]), self.data_points))
+            self.data_points = list(filter(lambda dp: not self.collide_rectpoint(rect, dp[0]), self.data_points))
             return
 
         for s in self.subtrees:
@@ -164,12 +194,12 @@ class NonTree:
                 s.del_from_rect(rect)
 
     def del_from_point(self, point):
-        """Deletes data points within on a point.
+        """Deletes data points on a point.
 
         :param point: A point in the form (x, y).
         """
         if not self.subtrees:  # leaf
-            self.data_points = set(filter(lambda dp: dp[0] != point, self.data_points))
+            self.data_points = list(filter(lambda dp: dp[0] != point, self.data_points))
             return
 
         for s in self.subtrees:
@@ -183,7 +213,7 @@ class NonTree:
         :param circ: A circle in the form (x, y, radius).
         """
         if not self.subtrees:  # leaf
-            self.data_points = set(filter(lambda dp: not self.collide_circlepoint(circ, dp[0]), self.data_points))
+            self.data_points = list(filter(lambda dp: not self.collide_circlepoint(circ, dp[0]), self.data_points))
             return
 
         for s in self.subtrees:
@@ -204,7 +234,7 @@ class NonTree:
                 break
 
         if all_empty:
-            self.data_points = set()
+            self.data_points = []
             self.subtrees = None
 
     def _issizelimit(self):
@@ -235,8 +265,8 @@ class NonTree:
 
         :param data_point: A data point in the form of ((x,y), value).
         """
-        if self.is_empty() or self.lvl == 0 or self._issizelimit():
-            self.data_points.add(data_point)
+        if not self.subtrees and (len(self.data_points) < self.BUCKET or self.lvl == 0 or self._issizelimit()):
+            self.data_points.append(data_point)
             return  # value set
 
         if not self.subtrees:  # leaf
@@ -288,8 +318,6 @@ class NonTree:
     def _split(self):
         """Split tree into sub-trees.
         """
-        self.subtrees = []
-
         # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1
@@ -344,15 +372,11 @@ class NonTree:
         # w8 = w2
         # h8 = h6
 
-        self.subtrees.append(NonTree((x, y, w0, h0), newlvl))
-        self.subtrees.append(NonTree((x1, y, w0, h0), newlvl))
-        self.subtrees.append(NonTree((x2, y, w2, h0), newlvl))
-        self.subtrees.append(NonTree((x, y3, w0, h0), newlvl))
-        self.subtrees.append(NonTree((x1, y3, w0, h0), newlvl))
-        self.subtrees.append(NonTree((x2, y3, w2, h0), newlvl))
-        self.subtrees.append(NonTree((x, y6, w0, h6), newlvl))
-        self.subtrees.append(NonTree((x1, y6, w0, h6), newlvl))
-        self.subtrees.append(NonTree((x2, y6, w2, h6), newlvl))
+        self.subtrees = [NonTree((x, y, w0, h0), newlvl), NonTree((x1, y, w0, h0), newlvl),
+                         NonTree((x2, y, w2, h0), newlvl), NonTree((x, y3, w0, h0), newlvl),
+                         NonTree((x1, y3, w0, h0), newlvl), NonTree((x2, y3, w2, h0), newlvl),
+                         NonTree((x, y6, w0, h6), newlvl), NonTree((x1, y6, w0, h6), newlvl),
+                         NonTree((x2, y6, w2, h6), newlvl)]
 
     @staticmethod
     def collide_rectpoint(rect, point):

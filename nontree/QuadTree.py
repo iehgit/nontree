@@ -7,7 +7,7 @@ class QuadTree(NonTree):
     This is a variant that splits each plane into 4 sub-trees in a 2 by 2 grid.
     """
 
-    MODE = 4
+    MODE = 4  # Number of subtrees a tree is split into
 
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
@@ -41,8 +41,6 @@ class QuadTree(NonTree):
     def _split(self):
         """Split tree into sub-trees.
         """
-        self.subtrees = []
-
         # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1
@@ -71,7 +69,5 @@ class QuadTree(NonTree):
         # w3 = w1
         # h3 = h2
 
-        self.subtrees.append(QuadTree((x, y, w0, h0), newlvl))
-        self.subtrees.append(QuadTree((x1, y, w1, h0), newlvl))
-        self.subtrees.append(QuadTree((x, y2, w0, h2), newlvl))
-        self.subtrees.append(QuadTree((x1, y2, w1, h2), newlvl))
+        self.subtrees = [QuadTree((x, y, w0, h0), newlvl), QuadTree((x1, y, w1, h0), newlvl),
+                         QuadTree((x, y2, w0, h2), newlvl), QuadTree((x1, y2, w1, h2), newlvl)]
