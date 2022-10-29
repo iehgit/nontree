@@ -241,43 +241,6 @@ class NonTree:
             if self.collide_rectcircle(s.rect, circ):
                 s.del_from_circle(circ)
 
-    def prune(self):
-        """Prunes empty sub-trees.
-        """
-        if not self.subtrees:  # leaf
-            return
-
-        for s in self.subtrees:
-            s.prune()
-            if not s.is_empty():
-                return
-
-        self.data_points = []
-        self.subtrees = None
-
-    def _issizelimit(self):
-        """Tests if tree is too small to be split into sub-trees.
-
-        :return: True if size below mimimum size, False if not.
-        """
-        return self.rect[2] < 3 or self.rect[3] < 3
-
-    def add_all(self, data_points):
-        """Adds an iterable of data points to the tree.
-
-        :param data_points: An iterable of data points in the form of ((x,y), value).
-        """
-        for data_point in data_points:
-            self.add(data_point)
-
-    def add_at(self, point, value):
-        """Combines a point and data to a data point and adds it to the tree.
-
-        :param point: A point in the form (x, y).
-        :param value: Any data.
-        """
-        self.add((point, value))
-
     def add(self, data_point):
         """Adds a data point to the tree.
 
@@ -295,43 +258,12 @@ class NonTree:
 
         self._push_sub(data_point)
 
-    def _push_sub(self, data_point):
-        """Push a data point into a sub-tree.
+    def _issizelimit(self):
+        """Tests if tree is too small to be split into sub-trees.
 
-        :param data_point: A data point in the form of ((x,y), value).
+        :return: True if size below mimimum size, False if not.
         """
-        point = data_point[0]
-
-        if point[0] < self.subtrees[1].rect[0]:  # x
-            if point[1] < self.subtrees[3].rect[1]:  # y
-                # push to upper left
-                self.subtrees[0].add(data_point)
-            elif point[1] < self.subtrees[6].rect[1]:  # y
-                # push to upper middle
-                self.subtrees[3].add(data_point)
-            else:
-                # push to upper right
-                self.subtrees[6].add(data_point)
-        elif point[0] < self.subtrees[2].rect[0]:  # x
-            if point[1] < self.subtrees[3].rect[1]:  # y
-                # push to middle left
-                self.subtrees[1].add(data_point)
-            elif point[1] < self.subtrees[6].rect[1]:  # y
-                # push to middle middle
-                self.subtrees[4].add(data_point)
-            else:
-                # push to middle right
-                self.subtrees[7].add(data_point)
-        else:
-            if point[1] < self.subtrees[3].rect[1]:  # y
-                # push to lower left
-                self.subtrees[2].add(data_point)
-            elif point[1] < self.subtrees[6].rect[1]:  # y
-                # push to lower middle
-                self.subtrees[5].add(data_point)
-            else:
-                # push to lower right
-                self.subtrees[8].add(data_point)
+        return self.rect[2] < 3 or self.rect[3] < 3
 
     def _split(self):
         """Split tree into sub-trees.
@@ -396,6 +328,104 @@ class NonTree:
                          NonTree((x, y6, w0, h6), newlvl, self.bucket), NonTree((x1, y6, w0, h6), newlvl, self.bucket),
                          NonTree((x2, y6, w2, h6), newlvl, self.bucket)]
 
+    def _push_sub(self, data_point):
+        """Push a data point into a sub-tree.
+
+        :param data_point: A data point in the form of ((x,y), value).
+        """
+        point = data_point[0]
+
+        if point[0] < self.subtrees[1].rect[0]:  # x
+            if point[1] < self.subtrees[3].rect[1]:  # y
+                # push to upper left
+                self.subtrees[0].add(data_point)
+            elif point[1] < self.subtrees[6].rect[1]:  # y
+                # push to upper middle
+                self.subtrees[3].add(data_point)
+            else:
+                # push to upper right
+                self.subtrees[6].add(data_point)
+        elif point[0] < self.subtrees[2].rect[0]:  # x
+            if point[1] < self.subtrees[3].rect[1]:  # y
+                # push to middle left
+                self.subtrees[1].add(data_point)
+            elif point[1] < self.subtrees[6].rect[1]:  # y
+                # push to middle middle
+                self.subtrees[4].add(data_point)
+            else:
+                # push to middle right
+                self.subtrees[7].add(data_point)
+        else:
+            if point[1] < self.subtrees[3].rect[1]:  # y
+                # push to lower left
+                self.subtrees[2].add(data_point)
+            elif point[1] < self.subtrees[6].rect[1]:  # y
+                # push to lower middle
+                self.subtrees[5].add(data_point)
+            else:
+                # push to lower right
+                self.subtrees[8].add(data_point)
+
+    def add_at(self, point, value):
+        """Combines a point and data to a data point and adds it to the tree.
+
+        :param point: A point in the form (x, y).
+        :param value: Any data.
+        """
+        self.add((point, value))
+
+    def add_all(self, data_points):
+        """Adds an iterable of data points to the tree.
+
+        :param data_points: An iterable of data points in the form of ((x,y), value).
+        """
+        for data_point in data_points:
+            self.add(data_point)
+
+    def remove(self, data_point):
+        """Removes a specific data_point from the tree.
+
+        :param data_point: A data point in the form of ((x,y), value).
+        """
+        if not self.subtrees:  # leaf
+            self.data_points = list(filter(lambda dp: dp != data_point, self.data_points))
+            return
+
+        for s in self.subtrees:
+            if self.collide_rectpoint(s.rect, data_point[0]):
+                s.remove(data_point)
+                break
+
+    def remove_at(self, point, value):
+        """Combines a point and data to a data point and removes it from the tree.
+
+        :param point: A point in the form (x, y).
+        :param value: Any data.
+        """
+        self.remove((point, value))
+
+    def remove_all(self, data_points):
+        """Removes an iterable of data points from the tree.
+
+        :param data_points: An iterable of data points in the form of ((x,y), value).
+        """
+        for data_point in data_points:
+            self.remove(data_point)
+
+    def prune(self):
+        """Prunes empty sub-trees.
+        """
+        if not self.subtrees:  # leaf
+            return
+
+        for s in self.subtrees:
+            s.prune()
+            if not s.is_empty():
+                return
+
+        self.data_points = []
+        self.subtrees = None
+
     @staticmethod
     def encompass_rectrect(rect, other_rect):
         """Test if rectangle encompasses rectangle
@@ -405,20 +435,7 @@ class NonTree:
         :return: True if rect encompasses other_rect, False if not.
         """
         return rect[0] <= other_rect[0] and rect[1] <= other_rect[1] and rect[0] + rect[2] >= other_rect[0] + \
-               other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
-
-    @staticmethod
-    @conditional_njit
-    def encompass_circlerect(circ, rect):
-        """Test if circle encompasses rectangle.
-
-        :param circ: A circle in the form (x, y, radius).
-        :param rect: A rectangle in form of (x, y, width, height).
-        :return: True if circ encompasses rect, False if not.
-        """
-        dx = max(abs(circ[0] - rect[0]), abs(circ[0] - (rect[0] + rect[2])))
-        dy = max(abs(circ[1] - rect[1]), abs(circ[1] - (rect[1] + rect[3])))
-        return dx ** 2 + dy ** 2 <= circ[2] ** 2
+            other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
 
     @staticmethod
     def collide_rectpoint(rect, point):
@@ -440,6 +457,19 @@ class NonTree:
         """
         return rect[0] < other_rect[0] + other_rect[2] and rect[1] < other_rect[1] + other_rect[3] and rect[0] + rect[
             2] > other_rect[0] and rect[1] + rect[3] > other_rect[1]
+
+    @staticmethod
+    @conditional_njit
+    def encompass_circlerect(circ, rect):
+        """Test if circle encompasses rectangle.
+
+        :param circ: A circle in the form (x, y, radius).
+        :param rect: A rectangle in form of (x, y, width, height).
+        :return: True if circ encompasses rect, False if not.
+        """
+        dx = max(abs(circ[0] - rect[0]), abs(circ[0] - (rect[0] + rect[2])))
+        dy = max(abs(circ[1] - rect[1]), abs(circ[1] - (rect[1] + rect[3])))
+        return dx ** 2 + dy ** 2 <= circ[2] ** 2
 
     @staticmethod
     @conditional_njit
