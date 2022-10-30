@@ -70,14 +70,7 @@ class NonTree:
         """
 
         if self.encompass_rectrect(rect, self.rect):
-            if not self.subtrees:  # leaf
-                return self.data_points
-
-            res = []
-            for s in self.subtrees:
-                res += s.get_from_encompassed()
-
-            return res
+            return self.get_from_encompassed()
 
         else:
             if not self.subtrees:  # leaf
@@ -126,14 +119,7 @@ class NonTree:
         :return: A list of data points in the form of ((x, y), value).
         """
         if self.encompass_circlerect(circ, self.rect):
-            if not self.subtrees:  # leaf
-                return self.data_points
-
-            res = []
-            for s in self.subtrees:
-                res += s.get_from_encompassed()
-
-            return res
+            return self.get_from_encompassed()
 
         else:
             if not self.subtrees:  # leaf
@@ -206,13 +192,27 @@ class NonTree:
 
         :param rect: A rectangle in form of (x, y, width, height).
         """
+        if self.encompass_rectrect(rect, self.rect):
+            self.del_from_encompassed()
+
+        else:
+            if not self.subtrees:  # leaf
+                self.data_points = list(filter(lambda dp: not self.collide_rectpoint(rect, dp[0]), self.data_points))
+                return
+
+            for s in self.subtrees:
+                if self.collide_rectrect(s.rect, rect):
+                    s.del_from_rect(rect)
+
+    def del_from_encompassed(self):
+        """Deletes all data points that are within the tree.
+        """
         if not self.subtrees:  # leaf
-            self.data_points = list(filter(lambda dp: not self.collide_rectpoint(rect, dp[0]), self.data_points))
+            self.data_points = []
             return
 
         for s in self.subtrees:
-            if self.collide_rectrect(s.rect, rect):
-                s.del_from_rect(rect)
+            s.del_from_encompassed()
 
     def del_from_point(self, point):
         """Deletes data points on a point.
@@ -233,13 +233,17 @@ class NonTree:
 
         :param circ: A circle in the form (x, y, radius).
         """
-        if not self.subtrees:  # leaf
-            self.data_points = list(filter(lambda dp: not self.collide_circlepoint(circ, dp[0]), self.data_points))
-            return
+        if self.encompass_circlerect(circ, self.rect):
+            self.del_from_encompassed()
 
-        for s in self.subtrees:
-            if self.collide_rectcircle(s.rect, circ):
-                s.del_from_circle(circ)
+        else:
+            if not self.subtrees:  # leaf
+                self.data_points = list(filter(lambda dp: not self.collide_circlepoint(circ, dp[0]), self.data_points))
+                return
+
+            for s in self.subtrees:
+                if self.collide_rectcircle(s.rect, circ):
+                    s.del_from_circle(circ)
 
     def add(self, data_point):
         """Adds a data point to the tree.
