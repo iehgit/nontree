@@ -52,6 +52,26 @@ class NonTree:
             ln += len(s)
         return ln
 
+    def __getitem__(self, point):
+        ret = self.get_from_point(point)
+        if not ret:
+            raise KeyError
+        return ret[0]
+
+    def __setitem__(self, point, value):
+        self.add_at(point, value)
+
+    def __delitem__(self, point):
+        if not self.test_and_del_from_point(point):
+            raise KeyError
+
+    def __iter__(self):
+        for data_point in self.get_from_encompassed():
+            yield data_point
+
+    def __contains__(self, data_point):
+        return data_point in self.get_from_point(data_point[0])
+
     def __bool__(self):
         return self.subtrees or self.data_points
 
@@ -227,6 +247,22 @@ class NonTree:
             if self.collide_rectpoint(s.rect, point):
                 s.del_from_point(point)
                 break
+
+    def test_and_del_from_point(self, point):
+        """Tests if there are data points on a point, and deletes them.
+
+        :param point: A point in the form (x, y).
+        :return: True if there have been data points on the point, False if not.
+        """
+        if not self.subtrees:  # leaf
+            to_delete = list(filter(lambda dp: dp[0] == point, self.data_points))
+            for del_dp in to_delete:
+                self.data_points.remove(del_dp)
+            return bool(to_delete)
+
+        for s in self.subtrees:
+            if self.collide_rectpoint(s.rect, point):
+                return s.test_and_del_from_point(point)
 
     def del_from_circle(self, circ):
         """Deletes data points within a circle.
@@ -439,7 +475,7 @@ class NonTree:
         :return: True if rect encompasses other_rect, False if not.
         """
         return rect[0] <= other_rect[0] and rect[1] <= other_rect[1] and rect[0] + rect[2] >= other_rect[0] + \
-            other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
+               other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
 
     @staticmethod
     def collide_rectpoint(rect, point):
