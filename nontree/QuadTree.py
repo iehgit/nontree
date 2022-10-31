@@ -16,27 +16,25 @@ class QuadTree(NonTree):
         """
         return self.rect[2] < 2 or self.rect[3] < 2
 
-    def _push_sub(self, data_point):
+    def _push_sub(self, point):
         """Push a data point into a sub-tree.
 
-        :param data_point: A data point in the form of ((x,y), value).
+        :param point: A point in the shape of (x,y).
         """
-        point = data_point[0]
-
         if point[0] < self.subtrees[1].rect[0]:  # x
             if point[1] < self.subtrees[2].rect[1]:  # y
                 # push to upper left
-                self.subtrees[0].add(data_point)
+                self.subtrees[0].add(point)
             else:
                 # push to lower left
-                self.subtrees[2].add(data_point)
+                self.subtrees[2].add(point)
         else:
             if point[1] < self.subtrees[2].rect[1]:  # y
                 # push to upper right
-                self.subtrees[1].add(data_point)
+                self.subtrees[1].add(point)
             else:
                 # push to lower right
-                self.subtrees[3].add(data_point)
+                self.subtrees[3].add(point)
 
     def _split(self):
         """Split tree into sub-trees.

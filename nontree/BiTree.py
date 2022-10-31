@@ -19,27 +19,25 @@ class BiTree(NonTree):
         else:
             return self.rect[2] < 2
 
-    def _push_sub(self, data_point):
+    def _push_sub(self, point):
         """Push a data point into a sub-tree.
 
-        :param data_point: A data point in the form of ((x,y), value).
+        :param point: A point in the shape of (x,y).
         """
-        point = data_point[0]
-
         if self.rect[3] > self.rect[2]:  # heigh > width
             if point[1] < self.subtrees[1].rect[1]:  # y
                 # push to upper
-                self.subtrees[0].add(data_point)
+                self.subtrees[0].add(point)
             else:
                 # push to lower
-                self.subtrees[1].add(data_point)
+                self.subtrees[1].add(point)
         else:
             if point[0] < self.subtrees[1].rect[0]:  # x
                 # push to left
-                self.subtrees[0].add(data_point)
+                self.subtrees[0].add(point)
             else:
                 # push to right
-                self.subtrees[1].add(data_point)
+                self.subtrees[1].add(point)
 
     def _split(self):
         """Split tree into sub-trees.

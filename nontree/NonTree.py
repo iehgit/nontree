@@ -20,7 +20,7 @@ class NonTree:
 
     def __init__(self, rect, lvl=None, bucket=20):
         """
-        :param rect: A rectangle in form of (x, y, width, height).
+        :param rect: A rectangle in the shape of (x, y, width, height).
         :param lvl: Maximum nesting depth. None for automatic heuristic value.
         :param bucket: Maximum number of points in a tree, before it is split into subtrees.
         """
@@ -37,266 +37,24 @@ class NonTree:
         self.lvl = lvl
         self.bucket = bucket
 
-        self.data_points = []
+        self.points = set()
         self.subtrees = None
 
     def __repr__(self):
-        return f"{type(self).__qualname__}({self.rect}, {self.lvl}, {self.bucket})"
+        name = type(self).__qualname__
+        return f"{name}({self.rect}, {self.lvl}, {self.bucket})"
 
     def __len__(self):
-        if self.data_points is not None:
-            return len(self.data_points)
+        if self.points is not None:
+            return len(self.points)
 
         ln = 0
         for s in self.subtrees:
             ln += len(s)
         return ln
 
-    def __getitem__(self, point):
-        ret = self.get_from_point(point)
-        if not ret:
-            raise KeyError
-        return ret[0]
-
-    def __setitem__(self, point, value):
-        self.add_at(point, value)
-
-    def __delitem__(self, point):
-        if not self.test_and_del_from_point(point):
-            raise KeyError
-
-    def __iter__(self):
-        for data_point in self.get_from_encompassed():
-            yield data_point
-
-    def __contains__(self, data_point):
-        return data_point in self.get_from_point(data_point[0])
-
     def __bool__(self):
-        return self.subtrees or self.data_points
-
-    def is_empty(self):
-        """Test if the tree contains no values.
-
-        :return: True if the tree contains no data points, False if not.
-        """
-        return not self.subtrees and not self.data_points
-
-    def get_from_rect(self, rect):
-        """Gets all data points that are within an rectangle.
-
-        :param rect: A rectangle in form of (x, y, width, height).
-        :return: A list of data points in the form of ((x, y), value).
-        """
-
-        if self.encompass_rectrect(rect, self.rect):
-            return self.get_from_encompassed()
-
-        else:
-            if not self.subtrees:  # leaf
-                return [dp for dp in self.data_points if self.collide_rectpoint(rect, dp[0])]
-
-            res = []
-            for s in self.subtrees:
-                if self.collide_rectrect(s.rect, rect):
-                    res += s.get_from_rect(rect)
-
-            return res
-
-    def get_from_encompassed(self):
-        """Gets all data points that are within the tree.
-
-        :return: A list of data points in the form of ((x, y), value).
-        """
-        if not self.subtrees:  # leaf
-            return self.data_points
-
-        res = []
-
-        for s in self.subtrees:
-            res += s.get_from_encompassed()
-        return res
-
-    def get_from_point(self, point):
-        """Gets all data points that are on a point.
-
-        :param point: A point in the form (x, y).
-        :return: A list of data points in the form of ((x, y), value).
-        """
-        if not self.subtrees:  # leaf
-            return [dp for dp in self.data_points if dp[0] == point]
-
-        for s in self.subtrees:
-            if self.collide_rectpoint(s.rect, point):
-                return s.get_from_point(point)
-
-        return []
-
-    def get_from_circle(self, circ):
-        """Gets all data points that are within a circle.
-
-        :param circ: A circle in the form (x, y, radius).
-        :return: A list of data points in the form of ((x, y), value).
-        """
-        if self.encompass_circlerect(circ, self.rect):
-            return self.get_from_encompassed()
-
-        else:
-            if not self.subtrees:  # leaf
-                return [dp for dp in self.data_points if self.collide_circlepoint(circ, dp[0])]
-
-            res = []
-            for s in self.subtrees:
-                if self.collide_rectcircle(s.rect, circ):
-                    res += s.get_from_circle(circ)
-
-            return res
-
-    def test_from_rect(self, rect):
-        """Tests if there are data points within a rectangle.
-
-        :param rect: A rectangle in form of (x, y, width, height).
-        :return: True if there are data points within the rectangle, False if not.
-        """
-        if not self.subtrees:  # leaf
-            for dp in self.data_points:
-                if self.collide_rectpoint(rect, dp[0]):
-                    return True
-        else:
-            for s in self.subtrees:
-                if self.collide_rectrect(s.rect, rect):
-                    if s.test_from_rect(rect):
-                        return True
-
-        return False
-
-    def test_from_point(self, point):
-        """Tests if there are data points on a point.
-
-        :param point: A point in the form (x, y).
-        :return: True if there are data points on the point, False if not.
-        """
-        if not self.subtrees:  # leaf
-            for dp in self.data_points:
-                if dp[0] == point:
-                    return True
-        else:
-            for s in self.subtrees:
-                if self.collide_rectpoint(s.rect, point):
-                    if s.test_from_point(point):
-                        return True
-                    break
-
-        return False
-
-    def test_from_circle(self, circ):
-        """Tests if there are data points within a circle.
-
-        :param circ: A circle in the form (x, y, radius).
-        :return: True if there are data points within the circle, False if not
-        """
-        if not self.subtrees:  # leaf
-            for dp in self.data_points:
-                if self.collide_circlepoint(circ, dp[0]):
-                    return True
-        else:
-            for s in self.subtrees:
-                if self.collide_rectcircle(s.rect, circ):
-                    if s.test_from_circle(circ):
-                        return True
-
-        return False
-
-    def del_from_rect(self, rect):
-        """Deletes data points within a rectangle.
-
-        :param rect: A rectangle in form of (x, y, width, height).
-        """
-        if self.encompass_rectrect(rect, self.rect):
-            self.del_from_encompassed()
-
-        else:
-            if not self.subtrees:  # leaf
-                self.data_points = list(filter(lambda dp: not self.collide_rectpoint(rect, dp[0]), self.data_points))
-                return
-
-            for s in self.subtrees:
-                if self.collide_rectrect(s.rect, rect):
-                    s.del_from_rect(rect)
-
-    def del_from_encompassed(self):
-        """Deletes all data points that are within the tree.
-        """
-        if not self.subtrees:  # leaf
-            self.data_points = []
-            return
-
-        for s in self.subtrees:
-            s.del_from_encompassed()
-
-    def del_from_point(self, point):
-        """Deletes data points on a point.
-
-        :param point: A point in the form (x, y).
-        """
-        if not self.subtrees:  # leaf
-            self.data_points = list(filter(lambda dp: dp[0] != point, self.data_points))
-            return
-
-        for s in self.subtrees:
-            if self.collide_rectpoint(s.rect, point):
-                s.del_from_point(point)
-                break
-
-    def test_and_del_from_point(self, point):
-        """Tests if there are data points on a point, and deletes them.
-
-        :param point: A point in the form (x, y).
-        :return: True if there have been data points on the point, False if not.
-        """
-        if not self.subtrees:  # leaf
-            to_delete = list(filter(lambda dp: dp[0] == point, self.data_points))
-            for del_dp in to_delete:
-                self.data_points.remove(del_dp)
-            return bool(to_delete)
-
-        for s in self.subtrees:
-            if self.collide_rectpoint(s.rect, point):
-                return s.test_and_del_from_point(point)
-
-    def del_from_circle(self, circ):
-        """Deletes data points within a circle.
-
-        :param circ: A circle in the form (x, y, radius).
-        """
-        if self.encompass_circlerect(circ, self.rect):
-            self.del_from_encompassed()
-
-        else:
-            if not self.subtrees:  # leaf
-                self.data_points = list(filter(lambda dp: not self.collide_circlepoint(circ, dp[0]), self.data_points))
-                return
-
-            for s in self.subtrees:
-                if self.collide_rectcircle(s.rect, circ):
-                    s.del_from_circle(circ)
-
-    def add(self, data_point):
-        """Adds a data point to the tree.
-
-        :param data_point: A data point in the form of ((x,y), value).
-        """
-        if not self.subtrees and (len(self.data_points) < self.bucket or self.lvl == 0 or self._issizelimit()):
-            self.data_points.append(data_point)
-            return
-
-        if not self.subtrees:  # leaf
-            self._split()
-            for p in self.data_points:
-                self._push_sub(p)
-            self.data_points = None
-
-        self._push_sub(data_point)
+        return self.subtrees or self.points
 
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
@@ -368,89 +126,271 @@ class NonTree:
                          NonTree((x, y6, w0, h6), newlvl, self.bucket), NonTree((x1, y6, w0, h6), newlvl, self.bucket),
                          NonTree((x2, y6, w2, h6), newlvl, self.bucket)]
 
-    def _push_sub(self, data_point):
-        """Push a data point into a sub-tree.
+    def _push_sub(self, point):
+        """Push a point into a sub-tree.
 
-        :param data_point: A data point in the form of ((x,y), value).
+        :param point: A data point in the shape of (x,y).
         """
-        point = data_point[0]
-
         if point[0] < self.subtrees[1].rect[0]:  # x
             if point[1] < self.subtrees[3].rect[1]:  # y
                 # push to upper left
-                self.subtrees[0].add(data_point)
+                self.subtrees[0].add(point)
             elif point[1] < self.subtrees[6].rect[1]:  # y
                 # push to upper middle
-                self.subtrees[3].add(data_point)
+                self.subtrees[3].add(point)
             else:
                 # push to upper right
-                self.subtrees[6].add(data_point)
+                self.subtrees[6].add(point)
         elif point[0] < self.subtrees[2].rect[0]:  # x
             if point[1] < self.subtrees[3].rect[1]:  # y
                 # push to middle left
-                self.subtrees[1].add(data_point)
+                self.subtrees[1].add(point)
             elif point[1] < self.subtrees[6].rect[1]:  # y
                 # push to middle middle
-                self.subtrees[4].add(data_point)
+                self.subtrees[4].add(point)
             else:
                 # push to middle right
-                self.subtrees[7].add(data_point)
+                self.subtrees[7].add(point)
         else:
             if point[1] < self.subtrees[3].rect[1]:  # y
                 # push to lower left
-                self.subtrees[2].add(data_point)
+                self.subtrees[2].add(point)
             elif point[1] < self.subtrees[6].rect[1]:  # y
                 # push to lower middle
-                self.subtrees[5].add(data_point)
+                self.subtrees[5].add(point)
             else:
                 # push to lower right
-                self.subtrees[8].add(data_point)
+                self.subtrees[8].add(point)
 
-    def add_at(self, point, value):
-        """Combines a point and data to a data point and adds it to the tree.
+    def add(self, point):
+        """Adds a point to the tree.
 
-        :param point: A point in the form (x, y).
-        :param value: Any data.
+        :param point: A point in the shape of (x,y).
         """
-        self.add((point, value))
+        if not self.subtrees and (len(self.points) < self.bucket or self.lvl == 0 or self._issizelimit()):
+            self.points.add(point)
+            return
 
-    def add_all(self, data_points):
-        """Adds an iterable of data points to the tree.
+        if not self.subtrees:  # leaf
+            self._split()
+            for p in self.points:
+                self._push_sub(p)
+            self.points = None
 
-        :param data_points: An iterable of data points in the form of ((x,y), value).
-        """
-        for data_point in data_points:
-            self.add(data_point)
+        self._push_sub(point)
 
-    def remove(self, data_point):
-        """Removes a specific data_point from the tree.
+    def remove(self, point):
+        """Removes a point from the tree.
 
-        :param data_point: A data point in the form of ((x,y), value).
+        :param point: A data point in the shape of (x,y).
         """
         if not self.subtrees:  # leaf
-            self.data_points = list(filter(lambda dp: dp != data_point, self.data_points))
+            self.points.remove(point)
             return
 
         for s in self.subtrees:
-            if self.collide_rectpoint(s.rect, data_point[0]):
-                s.remove(data_point)
-                break
+            if self.collide_rectpoint(s.rect, point):
+                s.remove(point)
+                return
 
-    def remove_at(self, point, value):
-        """Combines a point and data to a data point and removes it from the tree.
+    def get_from_encompassed(self):
+        """Gets all points that are within the tree.
 
-        :param point: A point in the form (x, y).
-        :param value: Any data.
+        :return: A set of points in the shape of (x, y).
         """
-        self.remove((point, value))
+        if not self.subtrees:  # leaf
+            return list(self.points)
 
-    def remove_all(self, data_points):
-        """Removes an iterable of data points from the tree.
+        res = []
+        for s in self.subtrees:
+            res += s.get_from_encompassed()
 
-        :param data_points: An iterable of data points in the form of ((x,y), value).
+        return res
+
+    def get_from_rect(self, rect):
+        """Gets all points that are within an rectangle.
+
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :return: A set of points in the shape of (x, y).
         """
-        for data_point in data_points:
-            self.remove(data_point)
+        if self.encompass_rectrect(rect, self.rect):
+            return self.get_from_encompassed()
+
+        if not self.subtrees:  # leaf
+            return [p for p in self.points if self.collide_rectpoint(rect, p)]
+
+        res = []
+        for s in self.subtrees:
+            if self.collide_rectrect(s.rect, rect):
+                res += s.get_from_rect(rect)
+
+        return res
+
+    def get_from_circle(self, circ):
+        """Gets all points that are within a circle.
+
+        :param circ: A circle in the shape of (x, y, radius).
+        :return: A set of points in the shape of (x, y).
+        """
+        if self.encompass_circlerect(circ, self.rect):
+            return self.get_from_encompassed()
+
+        if not self.subtrees:  # leaf
+            return [p for p in self.points if self.collide_circlepoint(circ, p)]
+
+        res = []
+        for s in self.subtrees:
+            if self.collide_rectcircle(s.rect, circ):
+                res += s.get_from_circle(circ)
+
+        return res
+
+    def get_from_point(self, point):
+        """Gets point if it is in the tree.
+
+        :param point: A point in the shape of (x, y).
+        :return: A set of points in the shape of (x, y).
+        """
+        if not self.subtrees:  # leaf
+            if point in self.points:
+                return [point]
+        else:
+            for s in self.subtrees:
+                if self.collide_rectpoint(s.rect, point):
+                    return s.get_from_point(point)
+
+        return []
+
+    def test_from_rect(self, rect):
+        """Tests if there are points within a rectangle.
+
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :return: True if there are points within the rectangle, False if not.
+        """
+        if not self.subtrees:  # leaf
+            for p in self.points:
+                if self.collide_rectpoint(rect, p):
+                    return True
+        else:
+            for s in self.subtrees:
+                if self.collide_rectrect(s.rect, rect):
+                    if s.test_from_rect(rect):
+                        return True
+
+        return False
+
+    def test_from_circle(self, circ):
+        """Tests if there are points within a circle.
+
+        :param circ: A circle in the shape of (x, y, radius).
+        :return: True if there are points within the circle, False if not
+        """
+        if not self.subtrees:  # leaf
+            for p in self.points:
+                if self.collide_circlepoint(circ, p):
+                    return True
+        else:
+            for s in self.subtrees:
+                if self.collide_rectcircle(s.rect, circ):
+                    if s.test_from_circle(circ):
+                        return True
+
+        return False
+
+    def test_from_point(self, point):
+        """Tests if point is in the tree.
+
+        :param point: A point in the shape of (x, y).
+        :return: True if point is in the tree, False if not.
+        """
+        if not self.subtrees:  # leaf
+            for p in self.points:
+                if p == point:
+                    return True
+        else:
+            for s in self.subtrees:
+                if self.collide_rectpoint(s.rect, point):
+                    if s.test_from_point(point):
+                        return True
+                    break
+
+        return False
+
+    def del_from_encompassed(self):
+        """Deletes all points that are within the tree.
+        """
+        if not self.subtrees:  # leaf
+            self.points = set()
+            return
+
+        for s in self.subtrees:
+            s.del_from_encompassed()
+
+    def del_from_rect(self, rect):
+        """Deletes points within a rectangle.
+
+        :param rect: A rectangle in shape of (x, y, width, height).
+        """
+        if self.encompass_rectrect(rect, self.rect):
+            self.del_from_encompassed()
+
+        else:
+            if not self.subtrees:  # leaf
+                self.points = set(filter(lambda p: not self.collide_rectpoint(rect, p), self.points))
+                return
+
+            for s in self.subtrees:
+                if self.collide_rectrect(s.rect, rect):
+                    s.del_from_rect(rect)
+
+    def del_from_circle(self, circ):
+        """Deletes points within a circle.
+
+        :param circ: A circle in the shape of (x, y, radius).
+        """
+        if self.encompass_circlerect(circ, self.rect):
+            self.del_from_encompassed()
+
+        else:
+            if not self.subtrees:  # leaf
+                self.points = set(filter(lambda p: not self.collide_circlepoint(circ, p), self.points))
+                return
+
+            for s in self.subtrees:
+                if self.collide_rectcircle(s.rect, circ):
+                    s.del_from_circle(circ)
+
+    def del_from_point(self, point):
+        """Deletes a point from the tree.
+        This is merely an alias for remove(point).
+
+        :param point: A data point in the shape of (x,y).
+        """
+        if not self.subtrees:  # leaf
+            self.points.remove(point)
+            return
+
+        for s in self.subtrees:
+            if self.collide_rectpoint(s.rect, point):
+                s.remove(point)
+                return
+
+    def test_and_del_from_point(self, point):
+        """Tests if point is in the tree, and deletes it.
+
+        :param point: A point in the shape of (x, y).
+        :return: True if the point has been in the tree, False if not.
+        """
+        if not self.subtrees:  # leaf
+            if point in self.points:
+                self.points.remove(point)
+                return True
+            else:
+                return False
+
+        for s in self.subtrees:
+            if self.collide_rectpoint(s.rect, point):
+                return s.test_and_del_from_point(point)
 
     def prune(self):
         """Prunes empty sub-trees.
@@ -460,29 +400,29 @@ class NonTree:
 
         for s in self.subtrees:
             s.prune()
-            if not s.is_empty():
+            if s:  # s not empty
                 return
 
-        self.data_points = []
+        self.points = set()
         self.subtrees = None
 
     @staticmethod
     def encompass_rectrect(rect, other_rect):
         """Test if rectangle encompasses rectangle
 
-        :param rect: A rectangle in form of (x, y, width, height).
-        :param other_rect: A rectangle in form of (x, y, width, height).
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :param other_rect: A rectangle in shape of (x, y, width, height).
         :return: True if rect encompasses other_rect, False if not.
         """
         return rect[0] <= other_rect[0] and rect[1] <= other_rect[1] and rect[0] + rect[2] >= other_rect[0] + \
-               other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
+            other_rect[2] and rect[1] + rect[3] >= other_rect[1] + other_rect[3]
 
     @staticmethod
     def collide_rectpoint(rect, point):
         """Test collision between rectangle and point.
 
-        :param rect: A rectangle in form of (x, y, width, height).
-        :param point: A point in the form (x, y).
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :param point: A point in the shape of (x, y).
         :return: True if collision, False if not.
         """
         return rect[0] <= point[0] <= rect[0] + rect[2] and rect[1] <= point[1] <= rect[1] + rect[3]
@@ -491,8 +431,8 @@ class NonTree:
     def collide_rectrect(rect, other_rect):
         """Test collision between rectangle and rectangle.
 
-        :param rect: A rectangle in form of (x, y, width, height).
-        :param other_rect: A rectangle in form of (x, y, width, height).
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :param other_rect: A rectangle in shape of (x, y, width, height).
         :return: True if collision, False if not.
         """
         return rect[0] < other_rect[0] + other_rect[2] and rect[1] < other_rect[1] + other_rect[3] and rect[0] + rect[
@@ -503,8 +443,8 @@ class NonTree:
     def encompass_circlerect(circ, rect):
         """Test if circle encompasses rectangle.
 
-        :param circ: A circle in the form (x, y, radius).
-        :param rect: A rectangle in form of (x, y, width, height).
+        :param circ: A circle in the shape of (x, y, radius).
+        :param rect: A rectangle in shape of (x, y, width, height).
         :return: True if circ encompasses rect, False if not.
         """
         dx = max(abs(circ[0] - rect[0]), abs(circ[0] - (rect[0] + rect[2])))
@@ -516,8 +456,8 @@ class NonTree:
     def collide_rectcircle(rect, circ):
         """Test collision between rectangle and circle.
 
-        :param rect: A rectangle in form of (x, y, width, height).
-        :param circ: A circle in the form (x, y, radius).
+        :param rect: A rectangle in shape of (x, y, width, height).
+        :param circ: A circle in the shape of (x, y, radius).
         :return: True if collision, False if not.
         """
         dx = circ[0] - max(rect[0], min(circ[0], rect[0] + rect[2]))
@@ -530,8 +470,8 @@ class NonTree:
     def collide_circlepoint(circ, point):
         """Test collision between circle and point.
 
-        :param circ: A circle in the form (x, y, radius).
-        :param point: A point in the form (x, y).
+        :param circ: A circle in the shape of (x, y, radius).
+        :param point: A point in the shape of (x, y).
         :return: True if collision, False if not.
         """
         dx = circ[0] - point[0]
