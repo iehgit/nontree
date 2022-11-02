@@ -1,6 +1,5 @@
 from collections.abc import MutableMapping
 from operator import itemgetter
-from itertools import chain
 
 from BiTree import BiTree
 from NonTree import NonTree
@@ -72,18 +71,24 @@ class TreeMap(MutableMapping):
         return tm
 
     def get_from_rect(self, rect):
-        ret = self.root.get_from_rect(rect)  # TODO return List, perf list(chain(itemgetter))) vs comprehension,
-        return chain(itemgetter(*ret)(self._d))  # TODO itertools.chain.from_iterable
+        ret = self.root.get_from_rect(rect)
+        out = []
+        for sublist in itemgetter(*ret)(self._d):
+            out += sublist
+        return out
 
     def get_from_circle(self, circ):
         ret = self.root.get_from_circle(circ)
-        return chain(itemgetter(*ret)(self._d))
+        out = []
+        for sublist in itemgetter(*ret)(self._d):
+            out += sublist
+        return out
 
     def get_from_point(self, point):
         try:
-            return tuple(self._d[point])
+            return self._d[point].copy()
         except KeyError:
-            return ()
+            return []
 
     def test_from_rect(self, rect):
         return self.root.test_from_rect(rect)
@@ -95,20 +100,18 @@ class TreeMap(MutableMapping):
         return point in self._d.keys
 
     def del_from_rect(self, rect):
-        for point in self.root.del_from_rect(rect):
+        ret = self.root.del_from_rect(rect)
+        for point in ret:
             del self[point]
+        return bool(ret)
 
     def del_from_circle(self, circ):
-        for point in self.root.del_from_circle(circ):
+        ret = self.root.del_from_circle(circ)
+        for point in ret:
             del self[point]
+        return bool(ret)
 
     def del_from_point(self, point):
-        try:
-            del self[point]
-        except KeyError:
-            pass
-
-    def test_and_del_from_point(self, point):
         try:
             del self[point]
         except KeyError:
