@@ -15,6 +15,7 @@ class NonTree:
     Based on the well known Quadtree data structure.
     This is a variant that splits each plane into 9 sub-trees in a 3 by 3 grid.
     """
+    __slots__ = 'rect', 'lvl', 'bucket', 'points', 'subtrees'
 
     MODE = 9  # Number of subtrees a tree is split into
 
