@@ -1,11 +1,13 @@
+from collections.abc import MutableMapping
 from operator import itemgetter
+from itertools import chain
 
 from BiTree import BiTree
 from NonTree import NonTree
 from QuadTree import QuadTree
 
 
-class TreeMap:
+class TreeMap(MutableMapping):
 
     def __init__(self, rect, lvl=None, bucket=20, mode=9):
         if lvl is not None and lvl < 0:
@@ -24,93 +26,64 @@ class TreeMap:
         elif mode == 2:
             self.root = BiTree(rect, lvl, bucket)
 
-        self.d = {}
+        self._d = {}
 
     def __repr__(self):
         name = type(self).__qualname__
-        return f"{name}({self.root.rect}, lvl={self.root.lvl}, bucket={self.root.bucket}, mode={self.root.MODE})"
+        root = self.root
+        return f"{name}({root.rect}, lvl={root.lvl}, bucket={root.bucket}, mode={root.MODE})"
 
     def __str__(self):
-        return self.d.__str__()
+        return self._d.__str__()
 
     def __len__(self):
-        return self.d.__len__()
+        return self._d.__len__()
 
     def __getitem__(self, point):
-        return tuple(self.d.__getitem__(point))  # might raise KeyError
+        return self._d.__getitem__(point)[0]  # might raise KeyError
 
     def __setitem__(self, point, value):
-        self.d.setdefault(point, []).append(value)
+        self._d.__setitem__(point, [value])
         self.root.add(point)
 
     def __delitem__(self, point):
-        self.d.__delitem__(point)  # might raise KeyError
+        self._d.__delitem__(point)  # might raise KeyError
         self.root.remove(point)
 
     def __iter__(self):
-        return self.d.__iter__()
+        return self._d.__iter__()
 
     def __reversed__(self):
-        return self.d.__reversed__()
+        return self._d.__reversed__()
 
     def __contains__(self, point):
-        return self.d.__contains__(point)
-
-    def get(self, key, default=None):
-        try:
-            return self[key]
-        except KeyError:
-            return default
+        return self._d.__contains__(point)
 
     def keys(self):
-        return self.d.keys()
+        return self._d.keys()
 
     def clear(self):
-        self.d.clear()
+        self._d.clear()
         self.root.del_from_encompassed()
-
-    def pop(self, point, *args):
-        k = self.d.pop(point, *args)  # might raise KeyError
-        self.root.remove(point)
-        return k
-
-    def popitem(self):
-        k, v = self.d.popitem()  # might raise KeyError if empty
-        self.root.remove(k)
-        return k, tuple(v)
-
-    def setdefault(self, point, default=None):
-        try:
-            return self[point]
-        except KeyError:
-            self[point] = default
-            return default
-
-    def values(self):
-        for v in self.d.values():
-            yield tuple(v)
-
-    def items(self):
-        for k, v in self.d.items():
-            yield k, tuple(v)
 
     def copy(self):
         tm = TreeMap(self.root.rect, lvl=self.root.lvl, bucket=self.root.bucket, mode=self.root.MODE)
-        for k, v in self.d.items():
-            for val in v:
-                tm[k] = val
+        tm.add_datapoints(self.get_datapoints())
         return tm
 
     def get_from_rect(self, rect):
-        ret = self.root.get_from_rect(rect)
-        return itemgetter(*ret)(self)
+        ret = self.root.get_from_rect(rect)  # TODO return List, perf list(chain(itemgetter))) vs comprehension,
+        return chain(itemgetter(*ret)(self._d))  # TODO itertools.chain.from_iterable
 
     def get_from_circle(self, circ):
         ret = self.root.get_from_circle(circ)
-        return itemgetter(*ret)(self)
+        return chain(itemgetter(*ret)(self._d))
 
     def get_from_point(self, point):
-        return self.get(point, ())
+        try:
+            return tuple(self._d[point])
+        except KeyError:
+            return ()
 
     def test_from_rect(self, rect):
         return self.root.test_from_rect(rect)
@@ -119,35 +92,33 @@ class TreeMap:
         return self.root.test_from_circle(circ)
 
     def test_from_point(self, point):
-        return point in self.keys
+        return point in self._d.keys
 
     def del_from_rect(self, rect):
         for point in self.root.del_from_rect(rect):
-            del self.d[point]
+            del self[point]
 
     def del_from_circle(self, circ):
         for point in self.root.del_from_circle(circ):
-            del self.d[point]
+            del self[point]
 
     def del_from_point(self, point):
         try:
-            del self.d[point]
+            del self[point]
         except KeyError:
             pass
-        else:
-            self.root.remove(point)
 
     def test_and_del_from_point(self, point):
         try:
-            del self.d[point]
+            del self[point]
         except KeyError:
             return False
         else:
-            self.root.remove(point)
             return True
 
     def add(self, point, value):
-        self[point] = value
+        self._d.setdefault(point, []).append(value)
+        self.root.add(point)
 
     def add_datapoints(self, datapoints):
         for dp in datapoints:
@@ -155,11 +126,11 @@ class TreeMap:
 
     def remove(self, point, value):
         try:
-            self.d[point].remove(value)
+            self._d[point].remove(value)
         except KeyError:
             pass
         else:
-            if not self[point]:  # empty list
+            if not self._d[point]:  # empty list
                 del self[point]
 
     def remove_datapoints(self, datapoints):
@@ -167,12 +138,12 @@ class TreeMap:
             self.remove(dp[0], dp[1])
 
     def get_datapoints(self):
-        for k, v in self.d.items():
+        for k, v in self._d.items():
             for val in v:
                 yield k, val
 
     def get_data(self):
-        for v in self.d.values():
+        for v in self._d.values():
             for val in v:
                 yield val
 
