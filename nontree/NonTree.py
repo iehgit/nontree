@@ -11,10 +11,11 @@ else:
 
 
 class NonTree:
-    """A class for efficient collision detection of data points in a sparse 2D plane.
+    """A class for efficient collision detection of points in a sparse 2D plane.
     Based on the well known Quadtree data structure.
     This is a variant that splits each plane into 9 sub-trees in a 3 by 3 grid.
     """
+
     __slots__ = 'rect', 'lvl', 'bucket', 'points', 'subtrees'
 
     MODE = 9  # Number of subtrees a tree is split into
@@ -22,8 +23,9 @@ class NonTree:
     def __init__(self, rect, lvl=None, bucket=20):
         """
         :param rect: A rectangle in the shape of (x, y, width, height).
-        :param lvl: Maximum nesting depth. None for automatic heuristic value.
-        :param bucket: Maximum number of points in a tree, before it is split into subtrees.
+        :param lvl: Maximum nesting depth. None for automatic heuristic value. >= 0
+        :param bucket: Maximum number of points in a tree, before it is split into subtrees.  >= 1
+        :raises ValueError: If lvl, bucket is out of bounds.
         """
         if lvl is None:
             # heuristic guess
@@ -60,7 +62,7 @@ class NonTree:
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
 
-        :return: True if size below mimimum size, False if not.
+        :return: True if size below minimum size, False if not.
         """
         return self.rect[2] < 3 or self.rect[3] < 3
 
@@ -130,7 +132,7 @@ class NonTree:
     def _push_sub(self, point):
         """Push a point into a sub-tree.
 
-        :param point: A data point in the shape of (x,y).
+        :param point: A data point in the shape of (x, y).
         """
         if point[0] < self.subtrees[1].rect[0]:  # x
             if point[1] < self.subtrees[3].rect[1]:  # y
@@ -166,7 +168,7 @@ class NonTree:
     def add(self, point):
         """Adds a point to the tree.
 
-        :param point: A point in the shape of (x,y).
+        :param point: A point in the shape of (x, y).
         """
         if not self.subtrees and (len(self.points) < self.bucket or self.lvl == 0 or self._issizelimit()):
             self.points.add(point)
@@ -183,7 +185,7 @@ class NonTree:
     def discard(self, point):
         """Removes a point from the tree.
 
-        :param point: A data point in the shape of (x,y).
+        :param point: A data point in the shape of (x, y).
         """
         if not self.subtrees:  # leaf
             self.points.discard(point)
@@ -197,7 +199,7 @@ class NonTree:
     def get_encompassed(self):
         """Gets all points that are within the tree.
 
-        :return: A set of points in the shape of (x, y).
+        :return: A list of points in the shape of (x, y).
         """
         if not self.subtrees:  # leaf
             return list(self.points)
@@ -209,10 +211,10 @@ class NonTree:
         return res
 
     def get_rect(self, rect):
-        """Gets all points that are within an rectangle.
+        """Gets all points that are within a rectangle.
 
         :param rect: A rectangle in shape of (x, y, width, height).
-        :return: A set of points in the shape of (x, y).
+        :return: A list of points in the shape of (x, y).
         """
         if self.encompass_rectrect(rect, self.rect):
             return self.get_encompassed()
@@ -231,7 +233,7 @@ class NonTree:
         """Gets all points that are within a circle.
 
         :param circ: A circle in the shape of (x, y, radius).
-        :return: A set of points in the shape of (x, y).
+        :return: A list of points in the shape of (x, y).
         """
         if self.encompass_circlerect(circ, self.rect):
             return self.get_encompassed()
@@ -250,7 +252,7 @@ class NonTree:
         """Gets point if it is in the tree.
 
         :param point: A point in the shape of (x, y).
-        :return: A set of points in the shape of (x, y).
+        :return: A list of point in the shape of (x, y).
         """
         if not self.subtrees:  # leaf
             if point in self.points:
@@ -284,7 +286,7 @@ class NonTree:
         """Tests if there are points within a circle.
 
         :param circ: A circle in the shape of (x, y, radius).
-        :return: True if there are points within the circle, False if not
+        :return: True if there are points within the circle, False if not.
         """
         if not self.subtrees:  # leaf
             for p in self.points:
@@ -375,7 +377,7 @@ class NonTree:
     def del_point(self, point):
         """Deletes a point from the tree.
 
-        :param point: A data point in the shape of (x,y).
+        :param point: A point in the shape of (x, y).
         :return: A list of deleted point.
         """
         if not self.subtrees:  # leaf

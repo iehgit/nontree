@@ -2,7 +2,7 @@ from NonTree import NonTree
 
 
 class QuadTree(NonTree):
-    """A class for efficient collision detection of data points in a sparse 2D plane.
+    """A class for efficient collision detection of points in a sparse 2D plane.
     Based on the well known Quadtree data structure.
     This is a variant that splits each plane into 4 sub-trees in a 2 by 2 grid.
     """
@@ -12,14 +12,14 @@ class QuadTree(NonTree):
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
 
-        :return: True if size below mimimum size, False if not.
+        :return: True if size below minimum size, False if not.
         """
         return self.rect[2] < 2 or self.rect[3] < 2
 
     def _push_sub(self, point):
         """Push a data point into a sub-tree.
 
-        :param point: A point in the shape of (x,y).
+        :param point: A point in the shape of (x, y).
         """
         if point[0] < self.subtrees[1].rect[0]:  # x
             if point[1] < self.subtrees[2].rect[1]:  # y
