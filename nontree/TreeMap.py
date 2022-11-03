@@ -8,7 +8,7 @@ from QuadTree import QuadTree
 
 class TreeMap(MutableMapping):
 
-    def __init__(self, rect, lvl=None, bucket=20, mode=9, ):
+    def __init__(self, rect, lvl=None, bucket=20, mode=9, extend_dict=None):
         if lvl is not None and lvl < 0:
             raise ValueError(f'lvl must be >= 0 or None, not {lvl}')
 
@@ -27,10 +27,14 @@ class TreeMap(MutableMapping):
 
         self._d = {}
 
+        if extend_dict:
+            self.extend(extend_dict)
+
     def __repr__(self):
         name = type(self).__qualname__
         root = self.root
-        return f"{name}({root.rect}, lvl={root.lvl}, bucket={root.bucket}, mode={root.MODE})"
+        extend = self._d.__repr__() if self._d else None
+        return f"{name}({root.rect}, lvl={root.lvl}, bucket={root.bucket}, mode={root.MODE}, extend_dict={extend})"
 
     def __str__(self):
         return self._d.__str__()
@@ -66,8 +70,8 @@ class TreeMap(MutableMapping):
         self.root.del_encompassed()
 
     def copy(self):
-        tm = TreeMap(self.root.rect, lvl=self.root.lvl, bucket=self.root.bucket, mode=self.root.MODE)
-        tm.add_datapoints(self.datapoints())
+        tm = TreeMap(self.root.rect, lvl=self.root.lvl, bucket=self.root.bucket, mode=self.root.MODE,
+                     extend_dict=self._d)
         return tm
 
     def get_rect(self, rect):
@@ -136,6 +140,11 @@ class TreeMap(MutableMapping):
     def add_datapoints(self, datapoints):
         for dp in datapoints:
             self.add(dp[0], dp[1])
+
+    def extend(self, extend_dict):
+        for k, v in extend_dict:
+            for val in v:
+                self.add(k, val)
 
     def discard(self, point, value):
         try:
