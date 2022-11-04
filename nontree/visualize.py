@@ -1,4 +1,7 @@
+import random
 from matplotlib import pyplot
+
+from nontree.NonTree import NonTree
 
 
 def plot(ntree, overlay=None):
@@ -8,7 +11,6 @@ def plot(ntree, overlay=None):
     :param ntree: A NonTree (or derivative)
     :param overlay: A list of points in the shape of (x, y).
     """
-
     pyplot.figure(figsize=(20, 20))
     pyplot.title(ntree)
 
@@ -42,3 +44,24 @@ def plot(ntree, overlay=None):
         pyplot.plot(x2, y2, 'b.')
 
     pyplot.show()
+
+
+def plot_demo():
+    ntree = NonTree((0, 0, 30000, 30000))
+    for i in range(2200):
+        x = random.randrange(30000)
+        y = random.randrange(30000)
+        if not (x < 5000 and y < 5000):
+            ntree.add((x, y))
+
+    for i in range(250):
+        x = random.randrange(26500, 29000)
+        y = random.randrange(26500, 29000)
+        ntree.add((x, y))
+
+    overlay = ntree.get_circle((15000, 15000, 10000))
+    plot(ntree, overlay)
+
+
+if __name__ == '__main__':
+    plot_demo()
