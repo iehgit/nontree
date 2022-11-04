@@ -1,9 +1,9 @@
 from collections.abc import MutableMapping
 from operator import itemgetter
 
-from BiTree import BiTree
-from NonTree import NonTree
-from QuadTree import QuadTree
+from nontree.BiTree import BiTree
+from nontree.NonTree import NonTree
+from nontree.QuadTree import QuadTree
 
 
 class TreeMap(MutableMapping):
@@ -76,13 +76,9 @@ class TreeMap(MutableMapping):
         return self._d.__contains__(point)
 
     def keys(self):
-        """D.keys() -> a set-like object providing a view on D's keys
-        """
         return self._d.keys()
 
     def clear(self):
-        """D.clear() -> None.  Remove all items from D.
-        """
         self._d.clear()
         self.root.del_encompassed()
 
@@ -102,6 +98,9 @@ class TreeMap(MutableMapping):
         :return: A list of objects.
         """
         ret = self.root.get_rect(rect)
+        if not ret:
+            return []
+
         out = []
         for sublist in itemgetter(*ret)(self._d):
             out += sublist
@@ -114,6 +113,9 @@ class TreeMap(MutableMapping):
         :return: A list of objects.
         """
         ret = self.root.get_circle(circ)
+        if not ret:
+            return []
+
         out = []
         for sublist in itemgetter(*ret)(self._d):
             out += sublist
@@ -229,7 +231,7 @@ class TreeMap(MutableMapping):
 
         :param extend_dict: A dict with points (x, y) as keys and lists of objects as values.
         """
-        for k, v in extend_dict:
+        for k, v in extend_dict.items():
             for val in v:
                 self.add(k, val)
 
@@ -265,13 +267,11 @@ class TreeMap(MutableMapping):
                 yield k, val
 
     def data(self):
-        """An iterator over all payload data in the tree.
-        """
+        """An iterator over all payload data in the tree."""
         for v in self._d.values():
             for val in v:
                 yield val
 
     def prune(self):
-        """Prunes empty sub-trees.
-        """
+        """Prunes empty sub-trees."""
         self.root.prune()

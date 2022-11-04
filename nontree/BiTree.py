@@ -1,4 +1,4 @@
-from NonTree import NonTree
+from nontree.NonTree import NonTree
 
 
 class BiTree(NonTree):
@@ -40,8 +40,7 @@ class BiTree(NonTree):
                 self.subtrees[1].add(point)
 
     def _split(self):
-        """Split tree into sub-trees.
-        """
+        """Split tree into sub-trees."""
         # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1

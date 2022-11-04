@@ -2,7 +2,7 @@ import math
 
 try:
     import numba
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     def conditional_njit(function):
         return function
 else:
@@ -57,7 +57,7 @@ class NonTree:
         return ln
 
     def __bool__(self):
-        return self.subtrees or self.points
+        return bool(self.subtrees) or bool(self.points)
 
     def _issizelimit(self):
         """Tests if tree is too small to be split into sub-trees.
@@ -67,8 +67,7 @@ class NonTree:
         return self.rect[2] < 3 or self.rect[3] < 3
 
     def _split(self):
-        """Split tree into sub-trees.
-        """
+        """Split tree into sub-trees."""
         # Calculation of rectangles for subtrees
         x, y, width, height = self.rect
         newlvl = self.lvl - 1
@@ -393,8 +392,7 @@ class NonTree:
                 return s.del_point(point)
 
     def prune(self):
-        """Prunes empty sub-trees.
-        """
+        """Prunes empty sub-trees."""
         if not self.subtrees:  # leaf
             return
 
@@ -408,7 +406,7 @@ class NonTree:
 
     @staticmethod
     def encompass_rectrect(rect, other_rect):
-        """Test if rectangle encompasses rectangle
+        """Test if rectangle encompasses rectangle.
 
         :param rect: A rectangle in shape of (x, y, width, height).
         :param other_rect: A rectangle in shape of (x, y, width, height).
