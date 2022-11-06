@@ -5,7 +5,7 @@ from nontree.NonTree import NonTree
 
 
 def plot(ntree, overlay=None, **kwargs):
-    """Plots the layout of a NonTree (or derivative) with matplotlib.
+    """Plots the layout of a NonTree (or derivative), using matplotlib.\x20\x20
     Optionally plots an overlay of additional points on top, in a different color.
 
     :param ntree: A NonTree (or derivative).
@@ -48,6 +48,8 @@ def plot(ntree, overlay=None, **kwargs):
 
 
 def plot_demo():
+    """Plots the layout of a demo NonTree, using matplotlib.\x20\x20
+    Also plots an overlay of additional points on top, in a different color."""
     ntree = NonTree((0, 0, 30000, 30000))
     for i in range(2200):
         x = random.randrange(30000)

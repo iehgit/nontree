@@ -11,8 +11,8 @@ else:
 
 
 class NonTree:
-    """A class for efficient collision detection of points in a sparse 2D plane.
-    Based on the well known Quadtree data structure.
+    """A class for efficient collision detection of points in a sparse 2D plane.\x20\x20
+    Based on the well known Quadtree data structure.\x20\x20
     This is a variant that splits each plane into 9 sub-trees in a 3 by 3 grid.
     """
 

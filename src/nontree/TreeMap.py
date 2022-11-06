@@ -7,9 +7,9 @@ from nontree.QuadTree import QuadTree
 
 
 class TreeMap(MutableMapping):
-    """The TreeMap contains a NonTree (or QuadTree, BiTree) and maps its points to payload data.
-    A single point can map to multiple data objects.
-    The TreeMap provides methods to make use of the underlying NonTree (or QuadTree, BiTree).
+    """The TreeMap contains a NonTree (or QuadTree, BiTree) and maps its points to payload data.\x20\x20
+    A single point can map to multiple data objects.\x20\x20
+    The TreeMap provides methods to make use of the underlying NonTree (or QuadTree, BiTree).\x20\x20
     It also provides a dict-ish interface.
     """
 

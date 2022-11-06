@@ -2,8 +2,8 @@ from nontree.NonTree import NonTree
 
 
 class BiTree(NonTree):
-    """A class for efficient collision detection of points in a sparse 2D plane.
-    Based on the well known Quadtree data structure.
+    """A class for efficient collision detection of points in a sparse 2D plane.\x20\x20
+    Based on the well known Quadtree data structure.\x20\x20
     This is a variant that splits each plane into 2 sub-trees alternately in a 1 by 2 or 2 by 1 grid.
     """
 
