@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nontree"
+version = "0.9.9"
+authors = [
+  { name="Sebastian Dalfuß", email="py@sedf.de" },
+]
+description = "A package for n-tree 2D data structures similar to and including quadtree, with mapping to payload data."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+optional-dependencies = [
+    "numba",
+    "matplotlib",
+]
+
+#[project.urls]
+#"Homepage" = "https://github.com/pypa/sampleproject"
+#"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"

@@ -4,14 +4,15 @@ from matplotlib import pyplot
 from nontree.NonTree import NonTree
 
 
-def plot(ntree, overlay=None):
+def plot(ntree, overlay=None, **kwargs):
     """Plots the layout of a NonTree (or derivative) with matplotlib.
     Optionally plots an overlay of additional points on top, in a different color.
 
-    :param ntree: A NonTree (or derivative)
+    :param ntree: A NonTree (or derivative).
     :param overlay: A list of points in the shape of (x, y).
+    :param kwargs: Keyword arguments, forwared to matplotlib.pyplot.figure().
     """
-    pyplot.figure(figsize=(20, 20))
+    pyplot.figure(**kwargs)
     pyplot.title(ntree)
 
     x = []
@@ -54,13 +55,13 @@ def plot_demo():
         if not (x < 5000 and y < 5000):
             ntree.add((x, y))
 
-    for i in range(250):
+    for i in range(100):
         x = random.randrange(26500, 29000)
         y = random.randrange(26500, 29000)
         ntree.add((x, y))
 
     overlay = ntree.get_circle((15000, 15000, 10000))
-    plot(ntree, overlay)
+    plot(ntree, overlay, figsize=(10, 10))
 
 
 if __name__ == '__main__':
