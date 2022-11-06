@@ -17,10 +17,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-optional-dependencies = [
-    "numba",
-    "matplotlib",
-]
+[project.optional-dependencies]
+jit = ["numba",]
+visualization = ["matplotlib",]
 
 [project.urls]
 "Homepage" = "https://github.com/iehgit/nontree"
