@@ -104,13 +104,13 @@ class TreeMapRectCircleTestCase(unittest.TestCase):
 
     def test_get_rect(self):
         ret = self.tm.get_rect((15, 15, 25000, 15000))
-        self.assertTrue("foo" in ret)
-        self.assertFalse("bar" in ret)
+        self.assertIn("foo", ret)
+        self.assertNotIn("bar", ret)
 
     def test_get_circle(self):
         ret = self.tm.get_circle((15000, 10000, 9900))
-        self.assertTrue("foo" in ret)
-        self.assertFalse("bar" in ret)
+        self.assertIn("foo", ret)
+        self.assertNotIn("bar", ret)
 
     def test_get_rect_zero(self):
         ret = self.tm.get_rect((30000, 20000, 1, 1))
@@ -171,6 +171,18 @@ class TreeMapGeneralTestCase(unittest.TestCase):
         retcpy = [dp for dp in cpy.data()]
         self.assertEqual(ret, retcpy)
 
+    def test_discard_datapoints_datapoints(self):
+        self.tm.discard_datapoints([((6808, 1972), "foo"), ((10684, 821), "foo")])
+        ret = [dp for dp in self.tm.datapoints()]
+        self.assertNotIn(((6808, 1972), "foo"), ret)
+        self.assertNotIn(((10684, 821), "foo"), ret)
+
+    def test_add_datapoints_datapoints(self):
+        self.tm.add_datapoints([((1, 1), "foo"), ((2, 2), "bar")])
+        ret = [dp for dp in self.tm.datapoints()]
+        self.assertIn(((1, 1), "foo"), ret)
+        self.assertIn(((2, 2), "bar"), ret)
+
     def test_clear_prune(self):
         self.tm.clear()
         self.assertEqual(len(self.tm), 0)
@@ -198,6 +210,12 @@ class NonTreeTestCase(unittest.TestCase):
         self.assertEqual(ret, [(17, 37)])
         ret = self.nt.get_point((17, 38))
         self.assertEqual(ret, [])
+
+    def test_add_get_encompassed(self):
+        for p in POINTS:
+            self.nt.add(p)
+        ret = self.nt.get_encompassed()
+        self.assertEqual(ret.sort(), POINTS.sort())
 
     def tearDown(self):
         pass
@@ -259,6 +277,12 @@ class QuadTreeTestCase(unittest.TestCase):
         ret = self.nt.get_point((17, 38))
         self.assertEqual(ret, [])
 
+    def test_add_get_encompassed(self):
+        for p in POINTS:
+            self.nt.add(p)
+        ret = self.nt.get_encompassed()
+        self.assertEqual(ret.sort(), POINTS.sort())
+
     def tearDown(self):
         pass
 
@@ -280,6 +304,12 @@ class BiTreeTestCase(unittest.TestCase):
         self.assertEqual(ret, [(17, 37)])
         ret = self.nt.get_point((17, 38))
         self.assertEqual(ret, [])
+
+    def test_add_get_encompassed(self):
+        for p in POINTS:
+            self.nt.add(p)
+        ret = self.nt.get_encompassed()
+        self.assertEqual(ret.sort(), POINTS.sort())
 
     def tearDown(self):
         pass
