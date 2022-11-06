@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nontree"
-version = "0.9.9"
+version = "1.0.0"
 authors = [
   { name="Sebastian Dalfuß", email="py@sedf.de" },
 ]
@@ -22,6 +22,6 @@ optional-dependencies = [
     "matplotlib",
 ]
 
-#[project.urls]
-#"Homepage" = "https://github.com/pypa/sampleproject"
-#"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+[project.urls]
+"Homepage" = "https://github.com/iehgit/nontree"
+"Bug Tracker" = "https://github.com/iehgit/nontree/issues"
