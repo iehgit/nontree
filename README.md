@@ -7,14 +7,14 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<div style="text-align: center;">
+<div align="center">
   <a href="https://github.com/iehgit/nontree">
     <img src="README.images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 style="text-align: center;">nontree</h3>
+<h3 align="center">nontree</h3>
 
-  <p style="text-align: center;">
+  <p align="center">
     A python package for n-tree 2D data structures similar to and including quadtree, with mapping to payload data
     <br />
     <a href="https://pydocs.sedf.de/nontree"><strong>Explore the docs »</strong></a>
