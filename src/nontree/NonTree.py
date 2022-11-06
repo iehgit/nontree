@@ -3,10 +3,10 @@ import math
 try:
     import numba
 except (ModuleNotFoundError, ImportError):
-    def conditional_njit(function):
+    def _conditional_njit(function):
         return function
 else:
-    def conditional_njit(function):
+    def _conditional_njit(function):
         return numba.njit(cache=True)(function)
 
 
@@ -437,7 +437,7 @@ class NonTree:
             2] > other_rect[0] and rect[1] + rect[3] > other_rect[1]
 
     @staticmethod
-    @conditional_njit
+    @_conditional_njit
     def encompass_circlerect(circ, rect):
         """Test if circle encompasses rectangle.
 
@@ -451,7 +451,7 @@ class NonTree:
         return dx ** 2 + dy ** 2 <= circ[2] ** 2
 
     @staticmethod
-    @conditional_njit
+    @_conditional_njit
     def collide_rectcircle(rect, circ):
         """Test collision between rectangle and circle.
 
@@ -465,7 +465,7 @@ class NonTree:
         return dx ** 2 + dy ** 2 <= circ[2] ** 2
 
     @staticmethod
-    @conditional_njit
+    @_conditional_njit
     def collide_circlepoint(circ, point):
         """Test collision between circle and point.
 
