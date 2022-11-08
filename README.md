@@ -9,7 +9,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/iehgit/nontree">
-    <img src="README.images/logo.png" alt="Logo" width="80" height="80">
+    <img src="https://raw.githubusercontent.com/iehgit/nontree/master/README.images/logo.png" alt="9&#x1F333;" width="80" height="80">
   </a>
 
 <h3 align="center">nontree</h3>
@@ -42,17 +42,19 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#testing">Testing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#project-links">Project Links</a></li>
   </ol>
 </details>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![Product Name Screen Shot][product-screenshot]
+![NonTree pyplot][product-screenshot]
 
 TODO
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -71,7 +73,7 @@ TODO
    ```
 
    ```sh
-   TODO
+   pip install nontree
    ```
 
 
@@ -87,7 +89,7 @@ _For more details, please refer to the [Documentation](https://pydocs.sedf.de/no
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request. Please make sure that all unit tests still pass after any changes.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -95,17 +97,41 @@ If you have a suggestion that would make this better, please fork the repo and c
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+You can also simply open an issue with the tag "enhancement".
+
+<!-- TESTING -->
+## Testing
+
+To run the unit tests:
+
+   ```sh
+   cd tests
+   PYTHONPATH=../src python3 utest.py 
+   ```
+
+   The output should look roughly similar to this:
+
+   ```    
+   .................................
+   ----------------------------------------------------------------------
+   Ran 33 tests in 0.319s
+
+   OK
+   ```
+
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-<!-- CONTACT -->
-## Contact
+<!-- PROJECT LINKS -->
+## Project Links
 
-Sebastian Dalfuß - [githubpublic@sedf.de](mailto:githubpublic@sedf.de)
+[Github](https://github.com/iehgit/nontree/)
 
-Project Link: [https://github.com/iehgit/nontree](https://github.com/iehgit/nontree)
+[PyPI](https://pypi.org/project/nontree/)
+
+[API documentation](https://pydocs.sedf.de/nontree/)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/iehgit/nontree.svg?style=for-the-badge
@@ -118,4 +144,4 @@ Project Link: [https://github.com/iehgit/nontree](https://github.com/iehgit/nont
 [issues-url]: https://github.com/iehgit/nontree/issues
 [license-shield]: https://img.shields.io/github/license/iehgit/nontree.svg?style=for-the-badge
 [license-url]: https://github.com/iehgit/nontree/blob/master/LICENSE
-[product-screenshot]: README.images/myplot.png
+[product-screenshot]: https://raw.githubusercontent.com/iehgit/nontree/master/README.images/myplot.png
