@@ -1,8 +1,8 @@
 import unittest
-from src.nontree.TreeMap import TreeMap
-from src.nontree.NonTree import NonTree
-from src.nontree.QuadTree import QuadTree
-from src.nontree.BiTree import BiTree
+from nontree.TreeMap import TreeMap
+from nontree.NonTree import NonTree
+from nontree.QuadTree import QuadTree
+from nontree.BiTree import BiTree
 
 # x = random.randrange(11, 29989)
 # y = random.randrange(11, 19989)
