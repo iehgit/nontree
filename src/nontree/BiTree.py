@@ -16,8 +16,8 @@ class BiTree(NonTree):
         """
         if self.rect[3] > self.rect[2]:  # height > width
             return self.rect[3] < 2
-        else:
-            return self.rect[2] < 2
+
+        return self.rect[2] < 2
 
     def _push_sub(self, point):
         """Push a data point into a sub-tree.

@@ -383,9 +383,9 @@ class NonTree:
             try:
                 self.points.remove(point)
             except KeyError:
-                return
+                return []
             else:
-                return point
+                return [point]
 
         for s in self.subtrees:
             if self.collide_rectpoint(s.rect, point):
