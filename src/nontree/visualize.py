@@ -20,16 +20,16 @@ def plot(ntree, overlay=None, **kwargs):
 
     axes = pyplot.gca()
 
-    def subplot(n):
-        axes.add_patch(pyplot.Rectangle((n.rect[0], n.rect[1]), n.rect[2], n.rect[3], fill=False))
+    def subplot(stree):
+        axes.add_patch(pyplot.Rectangle((stree.rect[0], stree.rect[1]), stree.rect[2], stree.rect[3], fill=False))
 
-        if n.points:
-            for p in n.points:
+        if stree.points:
+            for p in stree.points:
                 x.append(p[0])
                 y.append(p[1])
 
-        if n.subtrees:
-            for s in n.subtrees:
+        if stree.subtrees:
+            for s in stree.subtrees:
                 subplot(s)
 
     subplot(ntree)
@@ -51,13 +51,13 @@ def plot_demo():
     """Plots the layout of a demo NonTree, using matplotlib.\x20\x20
     Also plots an overlay of additional points on top, in a different color."""
     ntree = NonTree((0, 0, 30000, 30000))
-    for i in range(2200):
+    for _ in range(2200):
         x = random.randrange(30000)
         y = random.randrange(30000)
         if not (x < 5000 and y < 5000):
             ntree.add((x, y))
 
-    for i in range(100):
+    for _ in range(100):
         x = random.randrange(26500, 29000)
         y = random.randrange(26500, 29000)
         ntree.add((x, y))

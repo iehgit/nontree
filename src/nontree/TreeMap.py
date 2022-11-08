@@ -87,9 +87,9 @@ class TreeMap(MutableMapping):
 
         :return: A shallow copy of this TreeMap.
         """
-        tm = TreeMap(self.root.rect, lvl=self.root.lvl, bucket=self.root.bucket, mode=self.root.MODE,
-                     initial_dict=self._d)
-        return tm
+        tree_map = TreeMap(self.root.rect, lvl=self.root.lvl, bucket=self.root.bucket, mode=self.root.MODE,
+                           initial_dict=self._d)
+        return tree_map
 
     def get_rect(self, rect):
         """Gets payload data of all points that are within a rectangle.
@@ -203,9 +203,9 @@ class TreeMap(MutableMapping):
             ret = self._d.pop(point)
             self.root.discard(point)
             return ret
-        except KeyError as e:
+        except KeyError as ex:
             if default is ...:
-                raise e
+                raise ex
             return default
 
     def add(self, point, value):

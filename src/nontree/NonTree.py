@@ -51,10 +51,10 @@ class NonTree:
         if self.points is not None:
             return len(self.points)
 
-        ln = 0
+        length = 0
         for s in self.subtrees:
-            ln += len(s)
-        return ln
+            length += len(s)
+        return length
 
     def __bool__(self):
         return bool(self.subtrees) or bool(self.points)
@@ -390,6 +390,8 @@ class NonTree:
         for s in self.subtrees:
             if self.collide_rectpoint(s.rect, point):
                 return s.del_point(point)
+
+        return []
 
     def prune(self):
         """Prunes empty sub-trees."""
