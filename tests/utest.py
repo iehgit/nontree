@@ -217,6 +217,12 @@ class NonTreeTestCase(unittest.TestCase):
         ret = self.nt.get_encompassed()
         self.assertEqual(ret.sort(), POINTS.sort())
 
+    def test_add_del_point(self):
+        self.nt.add((17, 37))
+        self.nt.del_point((17, 37))
+        ret = self.nt.get_point((17, 37))
+        self.assertNotIn((17, 37), ret)
+
     def tearDown(self):
         pass
 
@@ -283,6 +289,12 @@ class QuadTreeTestCase(unittest.TestCase):
         ret = self.nt.get_encompassed()
         self.assertEqual(ret.sort(), POINTS.sort())
 
+    def test_add_del_point(self):
+        self.nt.add((17, 37))
+        self.nt.del_point((17, 37))
+        ret = self.nt.get_point((17, 37))
+        self.assertNotIn((17, 37), ret)
+
     def tearDown(self):
         pass
 
@@ -310,6 +322,12 @@ class BiTreeTestCase(unittest.TestCase):
             self.nt.add(p)
         ret = self.nt.get_encompassed()
         self.assertEqual(ret.sort(), POINTS.sort())
+
+    def test_add_del_point(self):
+        self.nt.add((17, 37))
+        self.nt.del_point((17, 37))
+        ret = self.nt.get_point((17, 37))
+        self.assertNotIn((17, 37), ret)
 
     def tearDown(self):
         pass
