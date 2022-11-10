@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nontree"
-version = "1.0.2"
+dynamic = ["version"]
 authors = [
   { name="Sebastian Dalfuß", email="py@sedf.de" },
 ]
@@ -27,3 +27,6 @@ homepage = "https://github.com/iehgit/nontree"
 repository = "https://github.com/iehgit/nontree"
 documentation = "https://pydocs.sedf.de/nontree"
 "Bug Tracker" = "https://github.com/iehgit/nontree/issues"
+
+[tool.hatch.version]
+path = "src/nontree/__init__.py"
