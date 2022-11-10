@@ -42,6 +42,11 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+      <ul>
+        <li><a href="#data-types">Data Types</a></li>
+        <li><a href="#constructing-a-tree">Constructing A Tree</a></li>
+        <li><a href="#collision-detection">Collision Detection</a></li>
+      </ul>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#testing">Testing</a></li>
     <li><a href="#license">License</a></li>
@@ -54,7 +59,43 @@
 
 ![NonTree pyplot][product-screenshot]
 
-TODO
+This package implements quadtree-like data structures in the classes `NonTree`, `QuadTree` and `BiTree`.
+More precisely speaking, **point-region (PR) quadtrees** and variants thereof are implemented.
+It also provides the class `TreeMap` to map points from the tree to arbitrary payload data, with a dictionary-like interface.
+
+A point-region quadtree is a recursive data structure to contain points that lie on a two dimensional surface.
+It allows for efficient collision detection between the containend points and an area.
+Thus it can answer the question "Which points are within that rectangular area?".
+
+In comparision to looping over all points and comparing the location of each point with the rectangular boundaries,
+a quadtree delivers the answer in _O_(log(n)) instead of _O_(n).
+
+This implementation also provides methods for circular collision detection.
+
+An exemplary application could be to test elements on a map of a 2D game, before rendering each frame, whether they are in the screen area and thus must be drawn,
+or if the time of drawing them can be saved due to them not beeing in a visible area anyway.
+
+For more information about quadtrees in general, see the [Wikipedia article](https://en.wikipedia.org/wiki/Quadtree).
+Or more specifically the [paragraph](https://en.wikipedia.org/wiki/Quadtree#Point-region_(PR)_quadtree) about point region quadtrees.
+
+A quadtree (4-tree) is split into 4 subtrees, if its bucket capacity is full and additional points are added. Thus, it's area gets split into 4 quadrants.
+The points then are stored in the subtrees, until they are at capacity and get split as well.
+That's the well known quadtree data structure.
+This package also implements two unusual variants thereof: The non-tree (9-tree) and the alternating bi-tree (2-tree).
+
+The quadtree splits each tree into 9 segments in a 3 by 3 grid.
+Due to reduced nesting depth, the retrieval of colliding points can be faster on a densely populated surface.
+
+The bitree splits each tree in only 2 segments, alternatingly horizontally or vertically.
+This tends to result in a higher nesting depth. But at each level, only two instead of four or nine subtrees have to be considered.
+Thus it can be faster on a very sparsely populated surface.
+
+The class `TreeMap` internally contains a `NonTree` (the default) or a `QuadTree` or `BiTree`.
+It maps the points of the tree to payload data. This allows the retrieval of objects that lie in the searched area.
+
+If no payload data is needed, and only the bare points are of interest, the tree classes can be used directly.
+
+Additionally, a module `visualize` exists, to plot a graph of the layout of a tree with the help of `matplotlib`.
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -105,6 +146,17 @@ Or you could simply construct a TreeMap, set a datapoint, and get back its data:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+### Data Types
+Points are defined as tuples in the shape of (x, y).  
+Data points are are defined as tuples in the shape of (point, data), i.e. ((x, y), data), whith data beeing any arbitrary object.  
+Rectangular areas are defined as tuples in the shape of (x, y, width, height), or anything that can be indexed in the same way.
+This allows the use of [pygame.Rect](https://www.pygame.org/docs/ref/rect.html).  
+Circular areas are defined as tuples in the shape of (x, y, radius).
+
+### Constructing A Tree
+TODO
+
+### Collision Detection
 TODO
 
 _For more details, please refer to the [Documentation](https://pydocs.sedf.de/nontree)._
