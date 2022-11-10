@@ -4,13 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nontree"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
   { name="Sebastian Dalfuß", email="py@sedf.de" },
 ]
 description = "A package for n-tree 2D data structures similar to and including quadtree, with mapping to payload data."
 readme = "README.md"
 requires-python = ">=3.10"
+license-files = { paths = ["LICENSE"] }
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -22,5 +23,7 @@ jit = ["numba",]
 visualization = ["matplotlib",]
 
 [project.urls]
-"Homepage" = "https://github.com/iehgit/nontree"
+homepage = "https://github.com/iehgit/nontree"
+repository = "https://github.com/iehgit/nontree"
+documentation = "https://pydocs.sedf.de/nontree"
 "Bug Tracker" = "https://github.com/iehgit/nontree/issues"
