@@ -155,14 +155,14 @@ This allows the use of [pygame.Rect](https://www.pygame.org/docs/ref/rect.html).
 Circular areas are defined as tuples in the shape of (x, y, radius).
 
 ### Constructing A TreeMap
-A TreeMap can be constructed like this, with a rectangle as its first parameter to specify its surface:
+A `TreeMap` can be constructed like this, with a rectangle as its first parameter to specify its surface:
 ```python
 from nontree.TreeMap import TreeMap
 
 tree_map = TreeMap((0, 0, 100, 100))
 ```
 
-Per default, it contains a NonTree. To specify the tree type, you can use the keyword argument `mode`, like this:
+Per default, it contains a `NonTree`. To specify the tree type, you can use the keyword argument `mode`, like this:
 ```python
 from nontree.TreeMap import TreeMap
 
