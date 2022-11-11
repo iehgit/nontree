@@ -44,7 +44,8 @@
     <li><a href="#usage">Usage</a></li>
       <ul>
         <li><a href="#data-types">Data Types</a></li>
-        <li><a href="#constructing-a-tree">Constructing A Tree</a></li>
+        <li><a href="#constructing-a-treemap">Constructing A TreeMap</a></li>
+        <li><a href="#adding-data-points-to-a-treemap">Adding Data Points To A TreeMap</a></li>
         <li><a href="#collision-detection">Collision Detection</a></li>
       </ul>
     <li><a href="#contributing">Contributing</a></li>
@@ -108,7 +109,7 @@ The package has no mandatory dependencies of other external packages, but it opt
 - [matplotlib](https://pypi.org/project/matplotlib/) to plot graphs of the tree layout, such as the one shown above.
 It is used by the module `visualize`.
 - [numba](https://pypi.org/project/numba/) to speed up (jit-compile) some of the calculations for circular collision detection.
-It get's detected/used automatically, without need for configuration or passing options.
+It gets detected/used automatically, without need for configuration or passing options.
 
 ### Installation
 You can get the raw files from the git repository:
@@ -153,11 +154,61 @@ Rectangular areas are defined as tuples in the shape of (x, y, width, height), o
 This allows the use of [pygame.Rect](https://www.pygame.org/docs/ref/rect.html).  
 Circular areas are defined as tuples in the shape of (x, y, radius).
 
-### Constructing A Tree
-TODO
+### Constructing A TreeMap
+A TreeMap can be constructed like this, with a rectangle as its first parameter to specify its surface:
+```python
+from nontree.TreeMap import TreeMap
+
+tree_map = TreeMap((0, 0, 100, 100))
+```
+
+Per default, it contains a NonTree. To specify the tree type, you can use the keyword argument `mode`, like this:
+```python
+from nontree.TreeMap import TreeMap
+
+tree_map_foo = TreeMap((0, 0, 100, 100), mode=9)  # NonTree
+tree_map_bar = TreeMap((0, 0, 100, 100), mode=4)  # QuadTree
+tree_map_baz = TreeMap((0, 0, 100, 100), mode=2)  # BiTree
+```
+
+### Adding Data Points To A TreeMap
+To add multiple data points:
+```python
+from nontree.TreeMap import TreeMap
+
+a_lot_of_datapoints = [((2, 3), 'dog'), ((17, 80), 'cat'), ((45, 13), 'fish'), ((99, 77), 'rat')]
+
+tree_map = TreeMap((0, 0, 100, 100))
+tree_map.add_datapoints(a_lot_of_datapoints)
+```
+
+To add a single data point, the dict-like interface is convenient:
+```python
+from nontree.TreeMap import TreeMap
+
+tree_map = TreeMap((0, 0, 100, 100))
+tree_map[(55, 89)] = 'goat'
+```
+
 
 ### Collision Detection
-TODO
+To query the data within an rectangular area of the surface, you can use the method `get_rect`, which takes a rectangle as its parameter:
+```python
+from nontree.TreeMap import TreeMap
+
+a_lot_of_datapoints = [((2, 3), 'dog'), ((17, 80), 'cat'), ((45, 13), 'fish'), ((99, 77), 'rat')]
+
+tree_map = TreeMap((0, 0, 100, 100))
+tree_map.add_datapoints(a_lot_of_datapoints)
+tree_map[(55, 89)] = 'goat'
+
+result = tree_map.get_rect((4, 4, 80, 80))
+print(result)
+```
+Output of the above:
+```
+['fish', 'cat']
+```
 
 _For more details, please refer to the [Documentation](https://pydocs.sedf.de/nontree)._
 
