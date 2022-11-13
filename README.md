@@ -238,11 +238,11 @@ PYTHONPATH=../src python3 utest.py
 The output should look roughly similar to this:
 
 ```    
-....................................
+......................................
 -------------------------------------------------------------------------------
-Ran 36 tests in 0.311s
+Ran 38 tests in 0.308s
 
-PASSED (successes=36)
+PASSED (successes=38)
 ```
 
 <!-- LICENSE -->

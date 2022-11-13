@@ -101,6 +101,10 @@ class TreeMap(MutableMapping):
         if not ret:
             return []
 
+        # for len(items) == 1 itemgetter(*items) does not return an iterable, as it does for len(items) > 1
+        if len(ret) == 1:
+            return self._d[ret[0]].copy()
+
         out = []
         for sublist in itemgetter(*ret)(self._d):
             out += sublist
@@ -115,6 +119,10 @@ class TreeMap(MutableMapping):
         ret = self.root.get_circle(circ)
         if not ret:
             return []
+
+        # for len(items) == 1 itemgetter(*items) does not return an iterable, as it does for len(items) > 1
+        if len(ret) == 1:
+            return self._d[ret[0]].copy()
 
         out = []
         for sublist in itemgetter(*ret)(self._d):

@@ -1,3 +1,4 @@
+import timeit
 import unittest
 from nontree.TreeMap import TreeMap
 from nontree.NonTree import NonTree
@@ -141,6 +142,24 @@ class TreeMapRectCircleTestCase(unittest.TestCase):
         self.tm.del_circle((5554, 4443, 77))
         ret = self.tm.test_circle((5554, 4443, 77))
         self.assertFalse(ret)
+
+    def tearDown(self):
+        pass
+
+
+class TreeMapSingleItemTestCase(unittest.TestCase):
+    def setUp(self):
+        self.tm = TreeMap((0, 0, 880, 495))
+        self.testobject = 6.78
+        self.tm[(0, 0)] = self.testobject
+
+    def test_get_rect(self):
+        ret = self.tm.get_rect((0, 0, 880, 495))
+        self.assertEqual(ret, [self.testobject])
+
+    def test_get_circle(self):
+        ret = self.tm.get_circle((0, 0, 440))
+        self.assertEqual(ret, [self.testobject])
 
     def tearDown(self):
         pass
