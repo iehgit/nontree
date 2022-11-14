@@ -149,7 +149,7 @@ Or you could simply construct a TreeMap, set a datapoint, and get back its data:
 
 ### Data Types
 Points are defined as tuples in the shape of (x, y).  
-Data points are are defined as tuples in the shape of (point, data), i.e. ((x, y), data), whith data beeing any arbitrary object.  
+Data points are defined as tuples in the shape of (point, data), i.e. ((x, y), data), with data beeing any arbitrary object.  
 Rectangular areas are defined as tuples in the shape of (x, y, width, height), or anything that can be indexed in the same way.
 This allows the use of [pygame.Rect](https://www.pygame.org/docs/ref/rect.html).  
 Circular areas are defined as tuples in the shape of (x, y, radius).
