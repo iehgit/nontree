@@ -9,7 +9,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/iehgit/nontree">
-    <img src="https://raw.githubusercontent.com/iehgit/nontree/master/README.images/logo.png" alt="9&#x1F333;" width="80" height="80">
+    <img src="https://raw.githubusercontent.com/iehgit/nontree/master/README.images/logo.png" alt="9&#x1F333;" width="78" height="78">
   </a>
 
 <h3 align="center">nontree</h3>
