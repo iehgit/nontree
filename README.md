@@ -84,7 +84,7 @@ The points then are stored in the subtrees, until they are at capacity and get s
 That's the well known quadtree data structure.
 This package also implements two unusual variants thereof: The non-tree (9-tree) and the alternating bi-tree (2-tree).
 
-The quadtree splits each tree into 9 segments in a 3 by 3 grid.
+The nontree splits each tree into 9 segments in a 3 by 3 grid.
 Due to reduced nesting depth, the retrieval of colliding points can be faster on a densely populated surface.
 
 The bitree splits each tree in only 2 segments, alternatingly horizontally or vertically.
